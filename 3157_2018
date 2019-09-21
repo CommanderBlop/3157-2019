@@ -1,0 +1,2511 @@
+#include "robot-config.h"
+#include <math.h>
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*        Written By: Jack Long, Kohmei Kadoya, and  Abby Dennin             */
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+
+/*----this is a test----*/
+//this is another test
+//this is a text from nhat's surface
+
+//Hail Brian
+//vex::brain      Brain;
+vex::motor      BackR(vex::PORT9, vex::gearSetting::ratio18_1, false);
+vex::motor      FrontR(vex::PORT10, vex::gearSetting::ratio18_1, true);
+vex::motor      BackL(vex::PORT2, vex::gearSetting::ratio18_1, true);
+vex::motor      FrontL(vex::PORT1, vex::gearSetting::ratio18_1, false);
+vex::motor      intake(vex::PORT3, vex::gearSetting::ratio18_1, false);
+vex::motor      loader(vex::PORT4, vex::gearSetting::ratio18_1, false);
+vex::motor      shooter(vex::PORT5, vex::gearSetting::ratio18_1, true);
+vex::motor      flipper(vex::PORT6, vex::gearSetting::ratio18_1, false);
+
+vex::vision::signature BALL (1, -347, 399, 26, -3921, -2787, -3354, 3, 0);
+vex::vision mainVis (vex::PORT7, 50, BALL);
+
+vex::vision::signature BALL2 (1, -2373, -1623, -1998, -533, 1335, 400, 1.2, 0);
+vex::vision mainVis2 (vex::PORT11, 50, BALL2);
+
+vex::sonar SonaR = vex::sonar(Brain.ThreeWirePort.A);//A and B
+//B is used by SonaR
+vex::limit LimBL = vex::limit(Brain.ThreeWirePort.C);
+vex::limit LimBR = vex::limit(Brain.ThreeWirePort.D);
+vex::motor29 redLight = vex::motor29(Brain.ThreeWirePort.E);
+vex::motor29 whiteLight = vex::motor29(Brain.ThreeWirePort.F);
+vex::gyro Gyro1 = vex::gyro(Brain.ThreeWirePort.G);
+vex::gyro GyroClimb = vex::gyro(Brain.ThreeWirePort.H);
+
+
+
+vex::controller con(vex::controllerType::primary);
+vex::controller con2(vex::controllerType::partner);
+
+using namespace vex;
+competition Competition1;
+
+int mode = 0;
+bool isTank = true;
+bool autonBlueF = false;
+bool autonRedB = false;
+bool autonBlueB = false;
+bool autonRedF = false;
+bool autonSkills = false;
+
+
+bool disableAuton = true;
+bool disableUC = true;
+
+bool reverse =false;
+double buffer = 1.0;
+
+double MAX_FLIPPER = 860;
+double MIN_FLIPPER = 0;
+
+//pre_auton check
+double TEMP_THRESH = 40;
+double LOW_TEMP_THRESH = 3;
+double TORQUE_THRESH = 0.8;
+double POWER_THRESH = 5;
+
+std::string currAuton = "";
+
+bool lastMovedFwd;
+bool intakeMoving;
+
+bool buzzed = false;
+
+bool activeInputForIntake = false;
+bool bangActive = false;
+
+bool oneBall = true;
+bool twoBall = true;
+
+
+//Above: Global Vars
+//---------------------------------//
+//    TASKS                        //
+//---------------------------------//
+
+int drive()
+{
+    while(true)
+    {
+
+        double y = con.Axis3.position(pct) * buffer;
+        double x = con.Axis1.position(pct) * buffer * 0.73 ; 
+
+        if(fmax(x, x*-1) > 3)
+        {
+            lastMovedFwd = false;
+        }
+        else if(fmax(y, y*-1) > 3)
+        {
+            lastMovedFwd = true;
+        }
+        if(fmax(y, y*-1) < 3 && fmax(x, x*-1) < 3)
+        { //no input
+            if(lastMovedFwd == false)
+            {
+                BackR.stop(brakeType::hold);
+                BackL.stop(brakeType::hold);
+                FrontR.stop(brakeType::hold);
+                FrontL.stop(brakeType::hold);
+            }
+            else
+            {
+                BackR.stop(brakeType::brake);
+                BackL.stop(brakeType::brake);
+                FrontR.stop(brakeType::brake);
+                FrontL.stop(brakeType::brake);
+            }
+        }
+        else
+        {
+            BackR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
+            FrontR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
+            BackL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
+            FrontL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
+        }
+        task::sleep(30);
+    }
+}
+
+int load() 
+{
+    if(oneBall && !twoBall)
+    {
+        intakeMoving = true;
+        intake.spin(directionType::rev, 100, velocityUnits::pct);
+        loader.spin(directionType::fwd, 100, velocityUnits::pct);
+
+        vex::task::sleep(300);
+
+        loader.spin(directionType::rev, 35, velocityUnits::pct);
+        intakeMoving = false;
+        buzzed = false;
+    }
+    else{
+        intakeMoving = true;
+        intake.spin(directionType::rev, 75, velocityUnits::pct);
+        loader.spin(directionType::fwd, 100, velocityUnits::pct);
+        vex::task::sleep(100);
+        intake.stop();
+        
+        vex::task::sleep(370);
+
+        loader.spin(directionType::rev, 35, velocityUnits::pct);
+
+        intake.spin(directionType::rev, 75, velocityUnits::pct);
+        vex::task::sleep(300);
+        intakeMoving = false;
+        buzzed = false;
+    }
+    return (0);
+
+}
+
+
+int buzzer(){
+    while(true){
+        if(shooter.velocity(velocityUnits::rpm) > 190 && !buzzed){
+            con.rumble("-");
+            buzzed = true;
+        }
+        vex::task::sleep(100);
+    }
+}
+
+int intakeDown() 
+{
+    intakeMoving = true;
+    intake.spin(directionType::rev, 1000, velocityUnits::pct);
+    vex::task::sleep(1200);
+    intake.stop(brakeType::coast);
+    intakeMoving = false;
+    return (0);
+}
+
+int ballStateManager()
+{
+    mainVis.setLedBrightness(100);
+    mainVis.setLedColor(210,255,230);
+    mainVis2.setLedBrightness(100);
+    mainVis2.setLedColor(210,255,230);
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setFont(fontType::mono40);
+    whiteLight.spin(directionType::fwd,30,velocityUnits::pct);
+    while(true)
+    {
+        mainVis2.takeSnapshot(BALL2);
+        mainVis.takeSnapshot(BALL);
+        
+        
+        /*Brain.Screen.setCursor(4,1);
+        Brain.Screen.clearLine();
+        Brain.Screen.print("N2:%1.0d,X:%3.0d,Y:%3.0d,H:%3.0d",mainVis2.objectCount,mainVis2.largestObject.centerX,mainVis2.largestObject.centerY,mainVis2.largestObject.height);
+        
+        Brain.Screen.setCursor(3,1);
+        Brain.Screen.clearLine();
+        Brain.Screen.print("N1:%1.0d,X:%3.0d,Y:%3.0d,H:%3.0d",mainVis.objectCount,mainVis.largestObject.centerX,mainVis.largestObject.centerY,mainVis.largestObject.height);
+        //*/
+        //Brain.Screen.render();
+        if(mainVis.largestObject.centerY  < 30 || !mainVis.largestObject.exists || mainVis.largestObject.height < 35)
+        {
+            //if ball does not exsits, is too small, or is not fully loaded
+            oneBall = false;
+            twoBall = false;
+        }
+        else if(mainVis2.largestObject.exists && mainVis2.largestObject.height > 65)
+        {
+            //there are two balls loaded
+            oneBall = true;
+            twoBall = true;
+        }
+        else
+        {
+            //Only one ball is fully loaded and there are no balls seen by 2nd vision
+            oneBall = true;
+            twoBall = false;
+        }
+        vex::task::sleep(50);
+    }
+}
+
+int LEDManager()
+{
+    Brain.resetTimer();
+    while(true)
+    {
+        if(!oneBall && !twoBall)
+        {
+            //if ball does not exsits, is too small, or is not fully loaded
+            //intake.spin(directionType::rev, 100, velocityUnits::pct); //Intake in!
+            redLight.spin(directionType::fwd,0,velocityUnits::pct);
+            //whiteLight.spin(directionType::fwd,0,velocityUnits::pct);
+        }
+        else if(oneBall && twoBall)
+        {
+            //there are two balls loaded
+            //intake.stop(brakeType::coast);
+            redLight.spin(directionType::fwd,100,velocityUnits::pct);
+            //whiteLight.spin(directionType::fwd,100,velocityUnits::pct);
+        }
+        vex::task::sleep(50);
+    }
+}
+
+int Flash(){
+    while(true){
+        if(oneBall && !twoBall){
+            redLight.spin(directionType::fwd,0,velocityUnits::pct);
+        }
+        task::sleep(250);
+        if(oneBall && !twoBall){
+            redLight.spin(directionType::fwd,100,velocityUnits::pct);
+        }
+        task::sleep(100);
+    }
+}
+
+int intakeManager()
+{
+    while(true)
+    {
+        if(con.ButtonL1.pressing()) 
+        {
+            intake.spin(directionType::fwd, 100, velocityUnits::pct);
+            vex::task::sleep(250);
+        }
+        else if(con.ButtonL2.pressing()) 
+        {
+            vex::task d(intakeDown);
+            vex::task::sleep(250);
+        }
+        else if(oneBall && twoBall)
+        {
+            //there are two balls loaded
+            intake.stop(brakeType::coast);
+            //redLight.spin(directionType::fwd,100,velocityUnits::pct);
+            //whiteLight.spin(directionType::fwd,100,velocityUnits::pct);
+        }
+        else if(intakeMoving)
+        {
+            //cooldown from intake Down. Dont do anything
+        }
+        else if(!oneBall && !twoBall)
+        {
+            //if ball does not exsits, is too small, or is not fully loaded
+            intake.stop(brakeType::coast);
+            //intake.spin(directionType::rev, 100, velocityUnits::pct); //Intake in!
+            //redLight.spin(directionType::fwd,0,velocityUnits::pct);
+            //whiteLight.spin(directionType::fwd,0,velocityUnits::pct);
+        }
+        else if(oneBall && !twoBall)
+        {
+            //Only one ball is fully loaded and there are no balls seen by 2nd vision
+            intake.stop(brakeType::coast);
+            //redLight.spin(directionType::fwd,10,velocityUnits::pct);
+            //whiteLight.spin(directionType::fwd,190,velocityUnits::pct);
+        }
+        vex::task::sleep(50);
+    }
+}
+
+int slowAndShootMid(){
+
+    intakeMoving = true;
+    intake.spin(directionType::fwd, 35, velocityUnits::pct);
+    loader.spin(directionType::fwd, 100, velocityUnits::pct);
+    vex::task::sleep(50);
+    intake.stop();
+    //activeInputForIntake = false;
+    vex::task::sleep(410);
+
+    loader.spin(directionType::rev, 35, velocityUnits::pct);
+    buzzed = false;
+
+    //activeInputForIntake = true;
+    intake.spin(directionType::fwd, 100, velocityUnits::pct);
+    buzzed = false;
+    shooter.spin(directionType::fwd, 128,velocityUnits::rpm);
+    /*double averageSpeed;
+    
+    double p = shooter.velocity(velocityUnits::rpm);
+    double pp = shooter.velocity(velocityUnits::rpm);
+    
+    averageSpeed = (pp + p + shooter.velocity(velocityUnits::rpm))/3;
+    
+    while(averageSpeed > 130 && averageSpeed < 120){
+        pp = p;
+        p = shooter.velocity(velocityUnits::rpm);
+        averageSpeed = (pp + p + shooter.velocity(velocityUnits::rpm))/3;
+        task::sleep(100);
+    }*/
+    task::sleep(135);
+    
+    intake.spin(directionType::fwd, 35, velocityUnits::pct);
+    loader.spin(directionType::fwd, 100, velocityUnits::pct);
+    vex::task::sleep(50);
+    intake.stop();
+    //activeInputForIntake = false;
+    vex::task::sleep(410);
+
+    loader.spin(directionType::rev, 35, velocityUnits::pct);
+    intake.stop(brakeType::coast);
+    
+
+    intakeMoving = false;
+    
+    shooter.spin(directionType::fwd, 200,velocityUnits::rpm);
+    return(0);
+}
+
+int display() {
+    double tempSpeed;
+    while(true) {
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.setCursor(3,1);
+        Brain.Screen.clearLine();
+        Brain.Screen.print("Gyro:%f", GyroClimb.value(rotationUnits::deg));
+        Brain.Screen.setCursor(4,1);
+        Brain.Screen.print("Gyro:%f", Gyro1.value(rotationUnits::deg));
+        /*
+        if(activeInputForIntake){
+            Brain.Screen.setCursor(4,1);
+            Brain.Screen.print("Active Inatke");
+        }
+        else{
+            Brain.Screen.setCursor(4,1);
+            Brain.Screen.print("NonActi Inatke");
+        }*/
+        /*
+        if(LimBR.pressing()){
+            Brain.Screen.setCursor(3,1);
+            Brain.Screen.print("BR Presssed");
+        }
+        else{
+            Brain.Screen.setCursor(3,1);
+            Brain.Screen.clearLine();
+        }
+        if(LimBL.pressing()){
+            Brain.Screen.setCursor(4,1);
+            Brain.Screen.print("BL Presssed");
+        }
+        else{
+            Brain.Screen.setCursor(4,1);
+            Brain.Screen.clearLine();
+        }
+        
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("SonaR %3.1f",SonaR.distance(distanceUnits::cm));
+        
+        Brain.Screen.setCursor(5,1);
+        Brain.Screen.print("shooter: %2.0f T: %2.0f",shooter.temperature(percentUnits::pct),intake.temperature(percentUnits::pct));
+
+        tempSpeed = shooter.velocity(velocityUnits::rpm)*15;
+
+        Brain.Screen.setCursor(6,1);
+        Brain.Screen.print("RPM: %3.1f",tempSpeed);
+        */
+        /*
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setFont(fontType::mono60);
+
+        Brain.Screen.setCursor(3,1);
+        Brain.Screen.print("Temp: %2.0f T: %2.0f",shooter.temperature(percentUnits::pct),intake.temperature(percentUnits::pct));
+
+        tempSpeed = shooter.velocity(velocityUnits::rpm)*15;
+
+        Brain.Screen.setCursor(2,1);
+        Brain.Screen.print("RPM: %3.1f",tempSpeed);*/
+
+        vex::task::sleep(20);
+    }
+
+    return (0);
+}
+
+//Above: Tasks
+//---------------------------------//
+//    GENERAL FUNCTIONS            //
+//---------------------------------//
+
+void brakeHold()
+{
+    FrontR.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);
+    FrontL.stop(brakeType::hold);
+    BackL.stop(brakeType::hold);
+}
+
+void brakeBrake()
+{
+    FrontR.stop(brakeType::brake);
+    BackR.stop(brakeType::brake);
+    FrontL.stop(brakeType::brake);
+    BackL.stop(brakeType::brake);
+}
+
+void brakeCoast()
+{
+    FrontR.stop(brakeType::coast);
+    BackR.stop(brakeType::coast);
+    FrontL.stop(brakeType::coast);
+    BackL.stop(brakeType::coast);
+}
+
+void setDriveSpeed(int speed){
+    BackR.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+}
+
+void setLeftSpeed(int speed){
+    BackL.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+}
+
+void setRightSpeed(int speed){
+    BackR.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, speed, vex::velocityUnits::pct);
+}
+
+//Must be half tile away and must be centered!!!
+
+void flipAndSuck(){
+    setDriveSpeed(60);
+    intake.spin(directionType::fwd,100,velocityUnits::pct);
+    vex::task::sleep(100); //250
+    setDriveSpeed(55); //150
+    
+    
+    
+    vex::task::sleep(200);
+    setDriveSpeed(60);
+    
+    vex::task::sleep(73);
+    intake.spin(directionType::rev,100,velocityUnits::pct);
+    vex::task::sleep(67);
+    
+    //vex::task::sleep(100);
+    
+    setDriveSpeed(40);
+    vex::task::sleep(35);
+    
+    vex::task::sleep(60);
+    setDriveSpeed(15);
+    
+    
+    
+    vex::task::sleep(300);
+    
+    setDriveSpeed(7);
+    vex::task::sleep(200);
+    setDriveSpeed(0);
+    //intake.stop(brakeType::brake;
+    //task::sleep(500);
+}
+
+void flipAndSuck2(){
+
+
+    intake.spin(directionType::fwd,100,velocityUnits::pct);
+    setDriveSpeed(52);
+    
+    vex::task::sleep(160);
+    
+    setDriveSpeed(40);
+    vex::task::sleep(38);
+    intake.spin(directionType::rev,100,velocityUnits::pct);
+    vex::task::sleep(176);
+    setDriveSpeed(30);
+    vex::task::sleep(40);
+    
+    vex::task::sleep(55);
+    setDriveSpeed(20);
+    
+    
+    
+    vex::task::sleep(100);
+    setDriveSpeed(0);
+    //intake.stop(brakeType::brake);
+    vex::task::sleep(120);
+    setDriveSpeed(-20);
+    vex::task::sleep(200); //250
+    setDriveSpeed(-30);
+    vex::task::sleep(200); //250
+    setDriveSpeed(-20);
+    vex::task::sleep(150);
+    setDriveSpeed(-10);
+    vex::task::sleep(150);
+    brakeHold();
+    
+    //task::sleep(500);
+}
+
+void flipAndSuck3(){
+    setDriveSpeed(40);
+    vex::task::sleep(800); //250
+    //setDriveSpeed(40); //150
+    
+    intake.spin(directionType::fwd,100,velocityUnits::pct);
+    
+    vex::task::sleep(125);
+    setDriveSpeed(60);
+    
+    vex::task::sleep(180);
+    
+    
+    //vex::task::sleep(100);
+    
+    setDriveSpeed(40);
+    vex::task::sleep(40);
+    intake.spin(directionType::rev,100,velocityUnits::pct);
+    vex::task::sleep(55);
+    setDriveSpeed(20);
+    
+    
+    
+    vex::task::sleep(120);
+    setDriveSpeed(0);
+    //intake.stop(brakeType::brake);
+    vex::task::sleep(120);
+    setDriveSpeed(-20);
+    vex::task::sleep(200); //250
+    setDriveSpeed(-30);
+    vex::task::sleep(400);
+    setDriveSpeed(-20);
+    vex::task::sleep(200);
+    brakeHold();
+    
+    task::sleep(500);
+}
+
+//Above: Genral Functions
+//---------------------------------//
+//    AUTON FUNCTIONS              //
+//---------------------------------//
+
+void intakeInAuton()
+{
+    intake.spin(directionType::rev, 70, velocityUnits::pct);
+}
+
+void intakeOutAuton() 
+{
+    intake.spin(directionType::fwd, 70, velocityUnits::pct);
+}
+
+void loadUpAuton()
+{
+    loader.spin(directionType::fwd, 100, velocityUnits::pct);
+}
+
+void loadDownAuton()
+{
+    loader.spin(directionType::rev, 100, velocityUnits::pct);
+}
+
+void backSquare(){
+    bool lastLeft = false;
+    flipper.rotateTo(0,rotationUnits::deg,30,velocityUnits::pct,true);
+    flipper.stop(brakeType::coast);
+    setDriveSpeed(-20);
+    bool done = false;
+    while(!done){
+        if(!LimBL.pressing() && !LimBR.pressing()){
+        }
+        else if(LimBL.pressing() && LimBR.pressing()){
+            done = true;
+        }
+        else if(LimBL.pressing()){
+            FrontR.spin(vex::directionType::rev, 20, pct);
+            BackR.spin(vex::directionType::rev, 20, pct);
+            FrontL.stop(brakeType::coast);
+            BackL.stop(brakeType::coast);
+            lastLeft = false;
+        }
+        else if(LimBR.pressing()){
+            FrontL.spin(vex::directionType::rev, 20, pct);
+            BackL.spin(vex::directionType::rev, 20, pct);
+            FrontR.stop(brakeType::coast);
+            BackR.stop(brakeType::coast);
+            lastLeft = true;
+
+        }
+        
+    }
+    
+    /*if(!lastLeft){
+        FrontR.spin(vex::directionType::rev, 20, pct);
+        BackR.spin(vex::directionType::rev, 20, pct);
+        FrontL.stop(brakeType::hold);
+        BackL.stop(brakeType::hold);
+    }
+    else{
+        FrontL.spin(vex::directionType::rev, 20, pct);
+        BackL.spin(vex::directionType::rev, 20, pct);
+        FrontR.stop(brakeType::hold);
+        BackR.stop(brakeType::hold);
+    }*/
+
+    //task::sleep(300);
+
+    setDriveSpeed(-20);
+
+    task::sleep(450);
+    
+    brakeHold();
+}
+
+void fixArmAfterBackSquare(){
+    flipper.rotateTo(50,rotationUnits::deg,20,velocityUnits::pct,false);
+}
+
+//Set long run to ture if you are squaring for more than 1 tile
+void frontSquare() 
+{
+    intakeInAuton();
+    setDriveSpeed(60);
+    Brain.Screen.setCursor(1,1);
+    while(SonaR.distance(distanceUnits::cm) > 50)
+    {
+        Brain.Screen.print("Untill 50 @ 60Spd %3.0f",SonaR.distance(distanceUnits::cm));
+    }
+    setDriveSpeed(50);
+    Brain.Screen.setCursor(2,1);
+    while(SonaR.distance(distanceUnits::cm) > 15)
+    {
+        Brain.Screen.print("Untill 30 @ 30Spd %3.0f",SonaR.distance(distanceUnits::cm));
+    }
+    setDriveSpeed(30);
+    Brain.Screen.setCursor(3,1);
+    while(SonaR.distance(distanceUnits::cm) > 8)
+    {
+        Brain.Screen.print("Untill 15 @ 10Spd %3.0f",SonaR.distance(distanceUnits::cm));
+    }
+    intake.stop(brakeType::coast);
+    Brain.Screen.setCursor(4,1);
+    setDriveSpeed(8);
+    while(SonaR.distance(distanceUnits::cm) > 5.5)
+    {
+        Brain.Screen.print("Untill 6 @ 8Spd %3.0f",SonaR.distance(distanceUnits::cm));
+    }
+    task::sleep(450);
+    brakeHold();
+        //task::sleep(150);
+}
+
+//Not tested!!!, squares where it is -  against the nearest perpendicular wall
+/*void virtualSquare(){ 
+    double diff = (SonaL.distance(distanceUnits::cm) - SonaR.distance(distanceUnits::cm));
+    if(diff > 3){//tiled left
+        while(diff > 3){
+            Brain.Screen.print("Left at D: %2.1f",diff);
+            setLeftSpeed(0.1*diff);
+            setRightSpeed(-0.1*diff);
+            diff = (SonaL.distance(distanceUnits::cm) - SonaR.distance(distanceUnits::cm));
+        }
+        brakeHold();
+    }
+    else if (diff < -3){//titled right
+        while(diff < -3){
+            Brain.Screen.print("Right at D: %2.1f",diff);
+            setLeftSpeed(-0.1*diff);
+            setRightSpeed(0.1*diff);
+            diff = (SonaL.distance(distanceUnits::cm) - SonaR.distance(distanceUnits::cm));
+        }
+        brakeHold();
+    }
+}*/
+
+//Above auton functions
+//---------------------------------//
+//    AUTON MOVEMENTS              //
+//---------------------------------//
+
+void moveForward( double power, double angle, double time, double shawnMendes, bool ramp)
+{
+    if(power < 0 || angle < 0 ||time < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("No negative numbers!");
+        vex::task::sleep(3000);
+    }
+
+    double angleMoved;
+    BackR.resetRotation();
+    BackL.resetRotation();
+    FrontR.resetRotation();
+    FrontL.resetRotation();
+    Brain.resetTimer();
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        BackL.spin(vex::directionType::fwd, shawnMendes * (power * (i / 100)), pct);
+        FrontR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        FrontL.spin(vex::directionType::fwd, shawnMendes * (power * (i / 100)), pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setFont(fontType::mono20);
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("Timer: %3.1f",Brain.timer(timeUnits::msec));
+    }
+
+    angleMoved = (BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4;
+    if(ramp){
+        angleMoved = angleMoved/2;
+    }
+    Brain.Screen.setCursor(2,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(3,1);
+    Brain.Screen.print("Rampup Angle: %3.1f",angleMoved);
+    Brain.Screen.setCursor(4,1);
+    Brain.Screen.print("MoveFor: %3.1f",(angle - (2 * angleMoved)));
+
+    if((angle - (2 * angleMoved)) < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("Error duration is: %3.1f",(angle - (2 * angleMoved)));
+        vex::task::sleep(3000);
+    }
+
+    BackR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+
+    while(((BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4) < (angle - (2 * angleMoved)))
+    {
+        Brain.Screen.setCursor(5,1);
+        Brain.Screen.print("Currently: %3.1f",((BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4));
+    }
+
+    if(ramp){
+        for(double i = 0; i < 100; i++)
+        {
+            BackR.spin(vex::directionType::fwd, shawnMendes * (power * (1- (i / 100))), vex::velocityUnits::pct);
+            BackL.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+            FrontR.spin(vex::directionType::fwd, shawnMendes * (power * (1 - (i / 100))), vex::velocityUnits::pct);
+            FrontL.spin(vex::directionType::fwd, power * (1 - (i / 100)), vex::velocityUnits::pct);
+            vex::task::sleep(time / 100);
+            Brain.Screen.setCursor(6,1);
+            Brain.Screen.print("FLSpeed: %3.1f",power * (1 - (i / 100)));
+        }
+    }
+
+    Brain.Screen.setCursor(7,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(8,1);
+    Brain.Screen.print("Complete fwd(%3.1f,%3.1f,%3.1f)",power,angle,time);
+
+    FrontR.stop(brakeType::hold);
+    FrontL.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);
+    BackL.stop(brakeType::hold);
+}
+
+void moveBackward( double power, double angle, double time, double shawnMendes)
+{
+    if(power < 0 || angle < 0 ||time < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("No negative numbers!");
+        vex::task::sleep(3000);
+    }
+    
+    angle = angle *-1;
+    power = power *-1;
+    double angleMoved;
+    BackR.resetRotation();
+    BackL.resetRotation();
+    FrontR.resetRotation();
+    FrontL.resetRotation();
+    Brain.resetTimer();
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        BackL.spin(vex::directionType::fwd, shawnMendes * (power * (i / 100)), pct);
+        FrontR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        FrontL.spin(vex::directionType::fwd, shawnMendes* (power * (i / 100)), pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setFont(fontType::mono20);
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("Timer: %3.1f",Brain.timer(timeUnits::msec));
+    }
+
+    angleMoved = (BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4;
+
+    Brain.Screen.setCursor(2,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(3,1);
+    Brain.Screen.print("Rampup Angle: %3.1f",angleMoved);
+    Brain.Screen.setCursor(4,1);
+    Brain.Screen.print("MoveFor: %3.1f",(angle - (2 * angleMoved)));
+
+    if((angle - (2 * angleMoved)) > 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("Error duration is: %3.1f",(angle - (2 * angleMoved)));
+        vex::task::sleep(3000);
+    }
+
+    BackR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+
+    Brain.Screen.setCursor(5,1);
+    Brain.Screen.print("Main did NOT run");
+    
+    while(((BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4) > (angle - (2 * angleMoved)))
+    {
+        Brain.Screen.setCursor(5,1);
+        Brain.Screen.print("Currently: %3.1f",((BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) + FrontR.rotation(rotationUnits::deg) + FrontL.rotation(rotationUnits::deg)) / 4));
+    }
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::fwd, shawnMendes * (power * (1- (i / 100))), vex::velocityUnits::pct);
+        BackL.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+        FrontR.spin(vex::directionType::fwd, shawnMendes * (power * (1 - (i / 100))), vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::fwd, power * (1 - (i / 100)), vex::velocityUnits::pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setCursor(6,1);
+        Brain.Screen.print("FLSpeed: %3.1f",power * (1 - (i / 100)));
+    }
+
+    Brain.Screen.setCursor(7,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(8,1);
+    Brain.Screen.print("Complete rev(%3.1f,%3.1f,%3.1f)",power,angle,time);
+    
+    FrontL.stop();
+    FrontR.stop();
+    BackL.stop();
+    BackR.stop();
+}
+
+void turnLeft(double power, double angle, double time)
+{
+    if(power < 0 || angle < 0 ||time < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("No negative numbers!");
+        vex::task::sleep(3000);         
+    }
+    
+    double angleMoved;
+    BackR.resetRotation();
+    BackL.resetRotation();
+    FrontR.resetRotation();
+    FrontL.resetRotation();
+    Brain.resetTimer();
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        BackL.spin(vex::directionType::rev, power * (i / 100), pct);
+        FrontR.spin(vex::directionType::fwd, power * (i / 100), pct);
+        FrontL.spin(vex::directionType::rev, power * (i / 100), pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setFont(fontType::mono20);
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("Timer: %3.1f",Brain.timer(timeUnits::msec));
+    }
+
+    angleMoved = (BackR.rotation(rotationUnits::deg) + (-1*BackL.rotation(rotationUnits::deg)) + FrontR.rotation(rotationUnits::deg) + (-1*FrontL.rotation(rotationUnits::deg))) / 4;
+
+    Brain.Screen.setCursor(2,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(3,1);
+    Brain.Screen.print("Rampup Angle: %3.1f",angleMoved);
+    Brain.Screen.setCursor(4,1);
+    Brain.Screen.print("MoveFor: %3.1f",(angle - (2 * angleMoved)));
+
+    if((angle - (2 * angleMoved)) < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("Error duration is: %3.1f",(angle - (2 * angleMoved)));
+        vex::task::sleep(3000);
+    }
+
+    BackR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::rev, power, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::rev, power, vex::velocityUnits::pct);
+
+    while(((BackR.rotation(rotationUnits::deg) + (-1*BackL.rotation(rotationUnits::deg)) + FrontR.rotation(rotationUnits::deg) + (-1*FrontL.rotation(rotationUnits::deg))) / 4) < (angle - (2 * angleMoved)))
+    {
+        Brain.Screen.setCursor(5,1);
+        Brain.Screen.print("Currently: %3.1f",((BackR.rotation(rotationUnits::deg) + (-1*BackL.rotation(rotationUnits::deg)) + FrontR.rotation(rotationUnits::deg) + (-1*FrontL.rotation(rotationUnits::deg))) / 4));
+    }
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+        BackL.spin(vex::directionType::rev, power * (1- (i / 100)), vex::velocityUnits::pct);
+        FrontR.spin(vex::directionType::fwd, power * (1 - (i / 100)), vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::rev, power * (1 - (i / 100)), vex::velocityUnits::pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setCursor(6,1);
+        Brain.Screen.print("FLSpeed: %3.1f",power * (1 - (i / 100)));
+    }
+
+    Brain.Screen.setCursor(7,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(8,1);
+    Brain.Screen.print("Complete fwd(%3.1f,%3.1f,%3.1f)",power,angle,time);
+
+    FrontL.stop();
+    FrontR.stop();
+    BackL.stop();
+    BackR.stop();
+}
+
+void turnRight(double power, double angle, double time)
+{
+    if(power < 0 || angle < 0 ||time < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("No negative numbers!");
+        vex::task::sleep(3000);
+    }
+    
+    double angleMoved;
+    BackR.resetRotation();
+    BackL.resetRotation();
+    FrontR.resetRotation();
+    FrontL.resetRotation();
+    Brain.resetTimer();
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::rev, power * (i / 100), pct);
+        BackL.spin(vex::directionType::fwd, power * (i / 100), pct);
+        FrontR.spin(vex::directionType::rev, power * (i / 100), pct);
+        FrontL.spin(vex::directionType::fwd, power * (i / 100), pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setFont(fontType::mono20);
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("Timer: %3.1f",Brain.timer(timeUnits::msec));
+    }
+
+    angleMoved = (BackL.rotation(rotationUnits::deg) + (-1*BackR.rotation(rotationUnits::deg)) + FrontL.rotation(rotationUnits::deg) + (-1*FrontR.rotation(rotationUnits::deg))) / 4;
+
+    Brain.Screen.setCursor(2,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(3,1);
+    Brain.Screen.print("Rampup Angle: %3.1f",angleMoved);
+    Brain.Screen.setCursor(4,1);
+    Brain.Screen.print("MoveFor: %3.1f",(angle - (2 * angleMoved)));
+
+    if((angle - (2 * angleMoved)) < 0)
+    {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.drawRectangle(0,0,2000,2000);
+        Brain.Screen.setCursor(3,2);
+        Brain.Screen.print("Error duration is: %3.1f",(angle - (2 * angleMoved)));
+        vex::task::sleep(3000);
+    }
+
+    BackR.spin(vex::directionType::rev, power, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::rev, power, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+
+    while(((BackL.rotation(rotationUnits::deg) + (-1*BackR.rotation(rotationUnits::deg)) + FrontL.rotation(rotationUnits::deg) + (-1*FrontR.rotation(rotationUnits::deg))) / 4) < (angle - (2 * angleMoved)))
+    {
+        Brain.Screen.setCursor(5,1);
+        Brain.Screen.print("Currently: %3.1f",((BackL.rotation(rotationUnits::deg) + (-1*BackR.rotation(rotationUnits::deg)) + FrontL.rotation(rotationUnits::deg) + (-1*FrontR.rotation(rotationUnits::deg))) / 4));
+    }
+
+    for(double i = 0; i < 100; i++)
+    {
+        BackR.spin(vex::directionType::rev, power * (1- (i / 100)), vex::velocityUnits::pct);
+        BackL.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+        FrontR.spin(vex::directionType::rev, power * (1 - (i / 100)), vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::fwd, power * (1 - (i / 100)), vex::velocityUnits::pct);
+        vex::task::sleep(time / 100);
+        Brain.Screen.setCursor(6,1);
+        Brain.Screen.print("FLSpeed: %3.1f",power * (1 - (i / 100)));
+    }
+
+    Brain.Screen.setCursor(7,1);
+    Brain.Screen.print("BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",BackR.rotation(rotationUnits::deg),BackL.rotation(rotationUnits::deg),FrontR.rotation(rotationUnits::deg),FrontL.rotation(rotationUnits::deg));
+    Brain.Screen.setCursor(8,1);
+    Brain.Screen.print("Complete fwd(%3.1f,%3.1f,%3.1f)",power,angle,time);
+
+    FrontL.stop();
+    FrontR.stop();
+    BackL.stop();
+    BackR.stop();
+}
+
+void turnRight(double degree) {
+    double curr = Gyro1.value(rotationUnits::deg);
+    BackR.spin(vex::directionType::rev, 30, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::fwd, 30, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::rev, 30, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::fwd, 30, vex::velocityUnits::pct);
+    while(curr - Gyro1.value(rotationUnits::deg)< degree - 28) {
+        task::sleep(5);
+    }
+    FrontL.stop(brakeType::hold);
+    FrontR.stop(brakeType::hold);
+    BackL.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);   
+}
+
+void turnLeft(double degree) {
+    double curr = Gyro1.value(rotationUnits::deg);
+    BackR.spin(vex::directionType::fwd, 30, vex::velocityUnits::pct);
+    BackL.spin(vex::directionType::rev, 30, vex::velocityUnits::pct);
+    FrontR.spin(vex::directionType::fwd, 30, vex::velocityUnits::pct);
+    FrontL.spin(vex::directionType::rev, 30, vex::velocityUnits::pct);
+    while(Gyro1.value(rotationUnits::deg) - curr < degree - 28 ) {
+        task::sleep(5);
+    }
+    FrontL.stop(brakeType::hold);
+    FrontR.stop(brakeType::hold);
+    BackL.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);   
+}
+
+
+//Above: auton movement functions
+//---------------------------------//
+//    USER CONTROLL FUNCTIONS      //
+//---------------------------------//
+
+void userInitArm(int degree){
+    flipper.rotateTo(degree ,rotationUnits::deg,30,velocityUnits::pct);
+    flipper.resetRotation();
+}
+
+void shooterUp() 
+{
+    shooter.spin(directionType::fwd, 500, velocityUnits::rpm);
+}
+
+void shooterDown()
+{
+    shooter.stop();
+}
+
+
+//Above: User controll functions
+//---------------------------------//
+//    PRE AUTON FUNCTIONS          //
+//---------------------------------//
+void initOS() {
+    Brain.Screen.clearScreen();
+    
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    
+    Brain.Screen.drawRectangle(5,60,153,86);
+    Brain.Screen.drawRectangle(5,150,153,86);
+    Brain.Screen.drawRectangle(163,60,153,86);
+    Brain.Screen.drawRectangle(163,150,153,86);
+    Brain.Screen.drawRectangle(321,60,153,86);
+    Brain.Screen.drawRectangle(321,150,153,86);
+ 
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setFont(fontType::prop40);
+    Brain.Screen.setCursor(1, 0);
+    if(autonRedF) {
+        Brain.Screen.print("Current Auton: Red Front");
+    } else if(autonRedB) {
+        Brain.Screen.print("Current Auton: Red Back");
+    } else if(autonBlueF) {
+        Brain.Screen.print("Current Auton: Blue Front");
+    } else if(autonBlueB) {
+        Brain.Screen.print("Current Auton: Blue Back");
+    } else {
+        Brain.Screen.setFillColor(transparent);
+        Brain.Screen.printAt(10,37,"Current Auton: EMPTY");
+        Brain.Screen.setFillColor(blue);
+    }
+    Brain.Screen.setFont(fontType::mono30);
+    Brain.Screen.printAt(15,112,"Calibrate");
+    Brain.Screen.printAt(193,98,"Select");
+    Brain.Screen.printAt(201,128,"Auton");
+    Brain.Screen.printAt(357,112,"Skills");
+    Brain.Screen.printAt(38,200,"Driver");
+    Brain.Screen.printAt(210,200,"Auton");
+    Brain.Screen.setFont(fontType::mono20);
+    Brain.Screen.printAt(340,197,"Competition");
+    
+    //Brain.Screen.render();
+}
+void initOS(char msg[20]) {
+    Brain.Screen.clearScreen();
+    
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    
+    Brain.Screen.drawRectangle(5,60,153,86);
+    Brain.Screen.drawRectangle(5,150,153,86);
+    Brain.Screen.drawRectangle(163,60,153,86);
+    Brain.Screen.drawRectangle(163,150,153,86);
+    Brain.Screen.drawRectangle(321,60,153,86);
+    Brain.Screen.drawRectangle(321,150,153,86);
+ 
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setFont(fontType::prop40);
+    Brain.Screen.setCursor(1, 0);
+    Brain.Screen.setFillColor(transparent);
+    Brain.Screen.setPenColor(red);
+    Brain.Screen.printAt(10,37,msg);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setFont(fontType::mono30);
+    Brain.Screen.printAt(15,112,"Calibrate");
+    Brain.Screen.printAt(193,98,"Select");
+    Brain.Screen.printAt(201,128,"Auton");
+    Brain.Screen.printAt(357,112,"Skills");
+    Brain.Screen.printAt(38,200,"Driver");
+    Brain.Screen.printAt(210,200,"Auton");
+    Brain.Screen.setFont(fontType::mono20);
+    Brain.Screen.printAt(340,197,"Competition");
+    Brain.Screen.render();
+    task::sleep(300);
+    
+}
+
+void select() {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(red);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(fontType::mono20);
+    Brain.Screen.drawRectangle(5, 122, 232, 112);
+    Brain.Screen.drawRectangle(5, 5, 232, 112);
+    Brain.Screen.printAt(85,60,"Red (LF)");
+    Brain.Screen.printAt(95,80,"Front");
+    Brain.Screen.printAt(85,177,"Red (LB)");
+    Brain.Screen.printAt(105,197,"Back");
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.drawRectangle(242, 5, 232, 112);
+    Brain.Screen.drawRectangle(242, 122, 232, 112);
+    Brain.Screen.printAt(312,60,"Blue (RF)");
+    Brain.Screen.printAt(327,80,"Front");
+    Brain.Screen.printAt(312,177,"Blue (RB)");
+    Brain.Screen.printAt(334,197,"Back");
+
+    while(!Brain.Screen.pressing()) 
+    {
+    }
+        if(Brain.Screen.xPosition() < 240 && Brain.Screen.yPosition() < 120) 
+        {
+            autonRedF = true;
+            autonBlueF = false;
+            autonRedB = false;
+            autonBlueB = false;
+        } 
+
+        else if(Brain.Screen.xPosition() < 240 && Brain.Screen.yPosition() > 120) 
+        {
+            autonRedF = false;
+            autonBlueF = false;
+            autonRedB = true;
+            autonBlueB = false;
+        } 
+
+        else if(Brain.Screen.xPosition() > 240 && Brain.Screen.yPosition() < 120) 
+        {
+            autonRedF = false;
+            autonBlueF = true;
+            autonRedB = false;
+            autonBlueB = false;
+        } 
+
+        else if(Brain.Screen.xPosition() > 240 && Brain.Screen.yPosition() > 120) 
+        {
+            autonRedF = false;
+            autonBlueF = false;
+            autonRedB = false;
+            autonBlueB = true;
+        }
+    
+    //Brain.Screen.newLine();
+    //Brain.Screen.print("Return to Home...");
+    //vex::task::sleep(1500);
+}
+
+void calibrate() {
+    double check = true;
+    double highestValues[3][7];
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(fontType::mono40);
+    Brain.Screen.setCursor(1,0);
+    Brain.Screen.print("Running");
+    Brain.Screen.setCursor(2,0);
+    Brain.Screen.print("System");
+    Brain.Screen.setCursor(3,0);
+    Brain.Screen.print("Check...");
+    vex::task::sleep(1000);
+
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 7; j++){
+            highestValues[i][j] = 0;
+        }
+    }
+
+    FrontR.spin(directionType::fwd, 75, velocityUnits::pct);
+    FrontL.spin(directionType::fwd, 75, velocityUnits::pct);
+    BackR.spin(directionType::fwd, 75, velocityUnits::pct);
+    BackL.spin(directionType::fwd, 75, velocityUnits::pct);
+    shooter.spin(directionType::fwd, 75, velocityUnits::pct);
+    intake.spin(directionType::fwd, 75, velocityUnits::pct);
+    loader.spin(directionType::fwd, 75, velocityUnits::pct);
+
+    Brain.resetTimer();
+    while(Brain.timer(timeUnits::msec) < 1000){
+        if(10 * BackL.torque(torqueUnits::Nm) > highestValues[0][0]){
+            highestValues[0][0] = 10 * BackL.torque(torqueUnits::Nm);
+        }
+        if(BackL.temperature(percentUnits::pct) > highestValues[1][0]){
+            highestValues[1][0] = BackL.temperature(percentUnits::pct);
+        }
+        if(BackL.power(powerUnits::watt) > highestValues[2][0]){
+            highestValues[2][0] = BackL.power(powerUnits::watt);
+        }
+        if(10 * BackR.torque(torqueUnits::Nm) > highestValues[0][1]){
+            highestValues[0][1] = 10 * BackR.torque(torqueUnits::Nm);
+        }
+        if(BackR.temperature(percentUnits::pct) > highestValues[1][1]){
+            highestValues[1][1] = BackR.temperature(percentUnits::pct);
+        }
+        if(BackR.power(powerUnits::watt) > highestValues[2][1]){
+            highestValues[2][1] = BackR.power(powerUnits::watt);
+        }
+        if(10 * FrontL.torque(torqueUnits::Nm) > highestValues[0][2]){
+            highestValues[0][2] = 10 * FrontL.torque(torqueUnits::Nm);
+        }
+        if(FrontL.temperature(percentUnits::pct) > highestValues[1][2]){
+            highestValues[1][2] = FrontL.temperature(percentUnits::pct);
+        }
+        if(FrontL.power(powerUnits::watt) > highestValues[2][2]){
+            highestValues[2][2] = FrontL.power(powerUnits::watt);
+        }
+        if(10 * FrontR.torque(torqueUnits::Nm) > highestValues[0][3]){
+            highestValues[0][3] = 10 * FrontR.torque(torqueUnits::Nm);
+        }
+        if(FrontR.temperature(percentUnits::pct) > highestValues[1][3]){
+            highestValues[1][3] = FrontR.temperature(percentUnits::pct);
+        }
+        if(FrontR.power(powerUnits::watt) > highestValues[2][3]){
+            highestValues[2][3] = FrontR.power(powerUnits::watt);
+        }
+        if(10 * shooter.torque(torqueUnits::Nm) > highestValues[0][4]){
+            highestValues[0][4] = 10 * shooter.torque(torqueUnits::Nm);
+        }
+        if(shooter.temperature(percentUnits::pct) > highestValues[1][4]){
+            highestValues[1][4] = shooter.temperature(percentUnits::pct);
+        }
+        if(shooter.power(powerUnits::watt) > highestValues[2][4]){
+            highestValues[2][4] = shooter.power(powerUnits::watt);
+        }
+        if(10 * intake.torque(torqueUnits::Nm) > highestValues[0][5]){
+            highestValues[0][5] = 10 * intake.torque(torqueUnits::Nm);
+        }
+        if(intake.temperature(percentUnits::pct) > highestValues[1][5]){
+            highestValues[1][5] = intake.temperature(percentUnits::pct);
+        }
+        if(intake.power(powerUnits::watt) > highestValues[2][5]){
+            highestValues[2][5] = intake.power(powerUnits::watt);
+        }
+        if(10 * loader.torque(torqueUnits::Nm) > highestValues[0][6]){
+            highestValues[0][6] = 10 * loader.torque(torqueUnits::Nm);
+        }
+        if(loader.temperature(percentUnits::pct) > highestValues[1][6]){
+            highestValues[1][6] = loader.temperature(percentUnits::pct);
+        }
+        if(loader.power(powerUnits::watt) > highestValues[2][6]){
+            highestValues[2][6] = loader.power(powerUnits::watt);
+        }
+        vex::task::sleep(50);
+    }
+    FrontR.stop();
+    FrontL.stop();
+    BackR.stop();
+    BackL.stop();
+    shooter.stop();
+    intake.stop();
+    loader.stop();
+
+    Brain.Screen.setPenColor(black);
+
+    if(highestValues[0][0] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][0] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][0] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][0] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][1] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][1] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][1] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][1] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][2] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][2] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][2] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][2] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][3] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][3] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][3] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][3] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][4] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][4] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][4] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][4] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][5] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][5] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][5] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][5] < POWER_THRESH){
+        check = false;
+    }
+
+    if(highestValues[0][6] > TORQUE_THRESH){
+        check = false;
+    }
+    if(highestValues[1][6] > TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[1][6] < LOW_TEMP_THRESH){
+        check = false;
+    }
+    if(highestValues[2][6] < POWER_THRESH){
+        check = false;
+    }
+    if(check) {
+        Brain.Screen.setFillColor(green);
+        Brain.Screen.setPenColor(black);
+    } else {
+        Brain.Screen.setFillColor(red);
+        Brain.Screen.setPenColor(white);
+    }
+    Brain.Screen.drawRectangle(0, 0, 2000, 2000);
+    Brain.Screen.setFont(fontType::mono30);
+    Brain.Screen.setCursor(1, 8);
+    Brain.Screen.print("BL");
+    Brain.Screen.setCursor(1, 11);
+    Brain.Screen.print("BR");
+    Brain.Screen.setCursor(1, 14);
+    Brain.Screen.print("FL");
+    Brain.Screen.setCursor(1, 17);
+    Brain.Screen.print("FR");
+    Brain.Screen.setCursor(1, 21);
+    Brain.Screen.print("S");
+    Brain.Screen.setCursor(1, 23);
+    Brain.Screen.print("IN");
+    Brain.Screen.setCursor(1, 26);
+    Brain.Screen.print("L");
+    Brain.Screen.setCursor(2, 1);
+    Brain.Screen.print("Torque");
+    Brain.Screen.setCursor(3, 1);
+    Brain.Screen.print("Temp");
+    Brain.Screen.setCursor(4, 1);
+    Brain.Screen.print("Power");
+    for(int r = 0; r < 3; r++) {
+        for(int c = 0; c < 7; c++) {
+            Brain.Screen.setCursor(r + 2, c * 3 + 8);
+            Brain.Screen.print("%2.f", highestValues[r][c]);
+        }
+    }
+    Brain.Screen.setCursor(6,0);
+    if(check) {
+        Brain.Screen.print("SYSTEM CHECK PASSED");
+    } else {
+        Brain.Screen.print("SYSTEM CHECK FAILED");
+    }
+    Brain.Screen.setCursor(7,0);
+    Brain.Screen.print("Press to return");
+    while(!Brain.Screen.pressing()) {}
+}
+
+//OS TASK DECLARED BEFORE int main()
+
+//Above: preAuton Functions
+//---------------------------------//
+//    MAIN TASKS                   //
+//---------------------------------//
+
+
+//Jack needs to clean this up!!!!
+//Abby's pole stack method below
+void startingAuton()
+{
+    loader.spin(directionType::rev,50,velocityUnits::pct);
+    //Starts intake
+   // intakeInAuton()
+    flipper.rotateTo(41,rotationUnits::deg,20,velocityUnits::pct,false);
+    //Moves forward to cap and sucks up ball
+    moveForward(80, 890, 500, 0.91, false);
+    flipAndSuck();
+    //task::sleep(250);
+    moveBackward(30, 480, 500, 0.91);
+    intake.stop();
+    turnLeft(130);
+    task::sleep(150);
+    moveBackward(50, 530, 500, 0.91);
+    task::sleep(150);
+    //Lift J Lift slightly off ground
+    flipper.rotateTo(550, vex::rotationUnits::deg, 47, vex::velocityUnits::pct, true);
+    task::sleep(250);
+    moveForward(15, 190, 50, 0.91, true);//Fowrdas that seems like back
+    intakeInAuton();
+    task::sleep(450);
+    turnLeft(60);
+    task::sleep(100);
+    moveForward(50, 800, 500, 0.91, false);
+    
+    setDriveSpeed(37);
+    
+    task::sleep(200);
+    setDriveSpeed(20);
+    
+    task::sleep(200);
+    
+    setDriveSpeed(15);
+    while(SonaR.distance(distanceUnits::cm) > 16)
+    {
+
+    }
+    vex::task::sleep(250);
+    FrontR.stop(brakeType::hold);
+    FrontL.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);
+    BackL.stop(brakeType::hold);
+
+    task::sleep(250);
+    //Flip J Lift get cap onto pole
+    flipper.rotateTo(860, vex::rotationUnits::deg, 40, vex::velocityUnits::pct);
+
+}
+
+int bang() {
+    while(true) {
+        if(bangActive){
+            flipper.rotateTo(-20, rotationUnits::deg, 100, velocityUnits::pct, false);
+            task::sleep(600);
+            flipper.rotateTo(140, rotationUnits::deg, 50, velocityUnits::pct, false);
+            task::sleep(800);
+        }
+        task::sleep(50);
+    }
+    
+    
+}
+
+void autonomous( void ) 
+{
+    while(disableAuton){
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setPenColor(white);
+        Brain.Screen.printAt(5,38,"Auton Disabled");
+        task::sleep(200);
+    }
+    //flipper.rotateTo(43,rotationUnits::deg,20,velocityUnits::pct,false);
+    //startingAuton();
+    if(autonSkills) {
+
+        /*Brain.Screen.clearScreen();
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.print("skills");
+        
+        //shooterUp(); //prep for the start of front auton
+        //loadDownAuton();
+        //intakeInAuton();
+        //task::sleep(5000);
+        
+        moveBackward(25, 175, 0, 0.91);
+        flipper.rotateTo(50, rotationUnits::deg, 40, velocityUnits::pct, false);
+        //task::sleep(250);
+        intakeInAuton();
+        //Turn right towards start square
+        //turnRight(40, 200, 0);
+        turnRight(107.5);
+        task::sleep(100);
+        //Move forward to square
+        shooterUp();
+        moveForward(80, 1380, 500, 0.91, true);
+        intake.stop();
+        task::sleep(100);
+        turnRight(106.5);
+        task::sleep(100);
+        setDriveSpeed(-55);
+        loader.spin(directionType::rev, 35, velocityUnits::pct);
+        vex::task::sleep(150);
+        backSquare();
+        moveForward(30, 150, 0, 0.91, true);
+        vex::task::sleep(100);
+        flipper.rotateTo(50, rotationUnits::deg, 75, velocityUnits::pct, true);
+        turnLeft(95); //pointing at left flags, get to right distance
+        task::sleep(100);
+        intake.stop();
+        loadUpAuton(); //SHOOT HIGH FLAG!!!!
+        vex::task::sleep(375);
+        loadDownAuton(); //and reset
+        turnLeft(5, 20, 0);
+        intakeInAuton();
+        moveForward(80, 600, 500, 0.91, true); //drive to the middle flag and SHOOT MID FLAG
+        task::sleep(100);
+        turnRight(15, 40, 0);
+        
+        loadUpAuton();
+        task::sleep(450);
+
+        loadDownAuton(); //reset
+
+        turnLeft(15, 35, 0); 
+        moveBackward(80, 780, 500, 0.91);
+        task::sleep(250);
+
+        
+        
+        //frontSquare(false);
+        
+
+        //intakeOutAuton();
+        //moveBackward(80, 720, 500, 0.91); //move back and turn to face the cap closer to the flag
+        task::sleep(100);
+        turnRight(110);
+        task::sleep(100);
+        backSquare();
+        
+        
+        vex::task::sleep(100);
+        
+        intakeInAuton();
+        shooterUp();
+        intake.spin(directionType::fwd,100,velocityUnits::pct);
+        moveForward(80, 1180, 500, 0.91, false);
+        fixArmAfterBackSquare();
+       
+        
+        //moveForward(50, 700, 500, 0.91, false);
+        //task::sleep(250);
+       
+        
+        
+        flipAndSuck2();
+        intakeInAuton();
+        flipper.rotateTo(200, rotationUnits::deg, 40, velocityUnits::pct, false); 
+        
+        //moveForward(60, 300, 500, 0.91, true);
+        //task::sleep(150);
+        turnLeft(77);
+        task::sleep(100);
+        
+        
+
+        
+        moveForward(80, 750, 500, 0.91, true);
+        flipper.rotateTo(50, rotationUnits::deg, 40, velocityUnits::pct, false);
+        task::sleep(100);
+        
+        vex::task abm(load);
+        task::sleep(470);
+        shooter.stop(brakeType::coast);  
+        
+        turnLeft(25, 25, 0);
+       // task::sleep(1000);
+        //turnLeft(15, 30, 0);*/
+        //TEMP -
+        fixArmAfterBackSquare();
+        setDriveSpeed(60);
+        vex::task::sleep(300);
+        frontSquare();
+       // frontSquare(false);
+      //  task::sleep(1000);
+        
+        
+        //moveBackward(15, 100, 200, 0.91); //back off so turn does not affect the flag
+        //task::sleep(100);
+
+        //turnLeft(40, 210, 0);//turn to the flag
+        intakeOutAuton();
+        moveBackward(55, 380, 100, 0.91); //back off from mid low flag and turn right 380
+        
+        task::sleep(100);
+        turnRight(108.4);
+        //turnRight(40, 210, 0);
+        task::sleep(100);
+
+        moveForward(80, 1350, 100, 0.91, false); //drive to the blue low flag and back into it to flip
+        setDriveSpeed(40);
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setFont(fontType::mono40);
+        Brain.Screen.setCursor(2,1);
+        Brain.Screen.print("SonaR %3.1f",SonaR.distance(distanceUnits::cm));
+        while(SonaR.distance(distanceUnits::cm) > 60){
+            Brain.Screen.setCursor(2,1);
+            Brain.Screen.print("SonaR %3.1f",SonaR.distance(distanceUnits::cm));
+            task::sleep(5);
+        }
+        task::sleep(30);
+        setDriveSpeed(10);
+        while(SonaR.distance(distanceUnits::cm) > 43){
+            Brain.Screen.setCursor(2,1);
+            Brain.Screen.print("SonaR %3.1f",SonaR.distance(distanceUnits::cm));
+            task::sleep(5);
+        }
+        brakeBrake();
+        task::sleep(100);
+        intakeOutAuton();
+        moveBackward(50, 460, 500, 0.91);
+        
+        task::sleep(100);
+        turnRight(103);
+        //turnRight(40, 210, 0);
+        task::sleep(100);
+        setDriveSpeed(-60);
+        task::sleep(250);
+        backSquare();
+        intake.stop(brakeType::coast);
+        moveForward(20, 50, 0, 0.91, true);
+        turnLeft(20, 22, 0);
+        
+        
+        moveForward(80, 500, 200, 0.91, false); //move forward and flip the cap closer to the low flag
+        setDriveSpeed(50);
+        task::sleep(100);
+        fixArmAfterBackSquare();
+        setDriveSpeed(20);
+        task::sleep(100);
+        
+        //
+        intakeOutAuton();
+        task::sleep(100);
+        setDriveSpeed(100);
+        //moveForward(80, 400, 0, 0.91, false);
+        task::sleep(640);
+        intake.stop(brakeType::coast);        
+        
+        
+        //moveBackward(30, 100, 100, 0.91); //move back so the motion does not affect the flipped cap
+        //moveForward(40, 530, 50, 0.91, true);
+        double power = 80;
+        double time = 300;
+        for(double i = 0; i < 100; i++)
+        {
+            BackR.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+            BackL.spin(vex::directionType::fwd, power * (1- (i / 100)), vex::velocityUnits::pct);
+            FrontR.spin(vex::directionType::fwd,  power * (1 - (i / 100)), vex::velocityUnits::pct);
+            FrontL.spin(vex::directionType::fwd, power * (1 - (i / 100)), vex::velocityUnits::pct);
+            vex::task::sleep(time / 100);
+        }
+        //moveBackward(30, 200, 200, 0.91);
+        task::sleep(200);
+        turnRight(111);
+        task::sleep(200);
+        flipAndSuck3();
+        
+        
+
+        task::sleep(100);
+        
+        //turnRight(30, 140, 0);
+        //task::sleep(200);
+
+        //TIME CLIMB
+        /*shooter.spin(directionType::fwd, 170, velocityUnits::rpm);
+        //flipAndSuck3(); //flip the cap and suck the ball
+        
+        moveBackward(80, 1000, 500, 0.91);
+        task::sleep(100);
+        turnRight(107);
+        task::sleep(100);
+        moveBackward(40, 700, 500, 0.91);
+        task::sleep(100);
+        turnLeft(107);
+        task::sleep(100);
+        setDriveSpeed(-50);
+        task::sleep(200);
+        backSquare();
+        //turnRight(10, 5, 0);
+        flipper.rotateTo(150, rotationUnits::deg, 50, velocityUnits::pct, false);
+        BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct); //squaring
+        FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        vex::task::sleep(800);
+        //flipper.rotateTo(-10, rotationUnits::deg, 100, velocityUnits::pct, true);
+        //flipper.rotateTo(140, rotationUnits::deg, 50, velocityUnits::pct, true);
+
+        //moveBackward(20, 100, 200, 0.91);
+        BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct); //squaring
+        FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        vex::task::sleep(2250);
+        //flipper.rotateTo(-30, rotationUnits::deg, 100, velocityUnits::pct, true);
+        vex::task::sleep(0);
+        while(BackL.torque(torqueUnits::Nm) * 10 <  7) {
+
+        }
+        FrontR.stop(brakeType::hold);
+        FrontL.stop(brakeType::hold);
+        BackR.stop(brakeType::hold);
+        BackL.stop(brakeType::hold);*/
+        /*
+        //task::sleep(200);
+
+        //moveForward(20, 100, 0, 0.91);
+        //moveBackward(55, 360, 300, 0.91); //move back for the distance to compensate for the moveAndSuck*/
+
+
+        turnLeft(110);
+        intake.stop();
+        loader.stop();
+        //shooter.spin(directionType::fwd, 170, velocityUnits::rpm);
+        task::sleep(300);
+        GyroClimb.startCalibration();
+        Brain.Screen.setFont(mono60);
+        Brain.Screen.clearScreen();
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("Calibration start");
+        while(GyroClimb.isCalibrating())
+        {
+            Brain.Screen.setFont(mono60);
+            Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(1,0);
+            Brain.Screen.print("Calibration inP");
+        }
+        Brain.Screen.setFont(mono60);
+        Brain.Screen.clearScreen();
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("Cal Done");
+        task::sleep(1000);
+        //turnLeft(40, 210, 0); //turn to the platform
+        //flipper.rotateTo(140, rotationUnits::deg, 50, velocityUnits::pct, false);
+        //vex::task d(display);
+        //vex::task ba(bang);
+        
+        double currGyro = GyroClimb.value(rotationUnits::deg);
+        shooter.spin(directionType::fwd, 165, velocityUnits::rpm);
+        double lastGyro;
+
+        flipper.rotateTo(50,rotationUnits::deg,50,velocityUnits::pct);
+        setDriveSpeed(25);
+        task::sleep(100);
+        
+        
+        //shooterUp();
+        
+        double max1 = GyroClimb.value(rotationUnits::deg);
+        setDriveSpeed(127);
+        task::sleep(200);
+        while(GyroClimb.value(rotationUnits::deg) < 14) {
+            if(GyroClimb.value(rotationUnits::deg) > max1){
+                max1 = GyroClimb.value(rotationUnits::deg);
+            }
+            Brain.Screen.setFont(mono60);
+            Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(1,0);
+            Brain.Screen.print("1");
+            task::sleep(35);
+        }
+        //bangActive = true;
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("1 DONE");
+        while(GyroClimb.value(rotationUnits::deg) > 6) {
+            Brain.Screen.setFont(mono60);
+            Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(2,0);
+            Brain.Screen.print("2");
+            task::sleep(35);
+        }
+        Brain.Screen.print("2 DONE");
+        setDriveSpeed(40);
+        task::sleep(200);
+
+        brakeHold();
+        Brain.Screen.print("2.5 Turn");
+        //moveBackward(10,20,0, 0.91);
+        //task::sleep(4000);
+        turnRight(100);
+        task::sleep(250);
+        //GyroClimb.startCalibration();
+        //while(GyroClimb.isCalibrating()){}
+        //turnLeft(40, 210, 0); //turn to the platform
+        //task::sleep(200);
+        //flipper.rotateTo(140, rotationUnits::deg, 50, velocityUnits::pct, false);
+        //vex::task d(display);
+        //vex::task ba(bang);
+        shooter.spin(directionType::fwd, 167, velocityUnits::rpm);
+        //double lastGyro;
+
+        flipper.rotateTo(50,rotationUnits::deg,50,velocityUnits::pct);
+        Brain.Screen.clearScreen();
+        Brain.Screen.print("3 St");
+        //setDriveSpeed(25);
+        //task::sleep(100);
+        
+        
+        //shooterUp();
+        
+        
+        setDriveSpeed(127);
+        task::sleep(200);
+        while(GyroClimb.value(rotationUnits::deg) < 14) {
+            /*if(GyroClimb.value(rotationUnits::deg) > 6){
+                max2= GyroClimb.value(rotationUnits::deg);
+            }*/
+            Brain.Screen.setFont(mono60);
+            //Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(1,0);
+            Brain.Screen.print("3 ");
+            task::sleep(35);
+        }
+        //bangActive = true;
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("3 DONE");
+        while(GyroClimb.value(rotationUnits::deg) > 6) {
+            Brain.Screen.setFont(mono60);
+            //Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(2,0);
+            Brain.Screen.print("4");
+            task::sleep(35);
+        }
+        task::sleep(100);
+
+        brakeHold();
+        
+        //flipper.rotateTo(140,rotationUnits::deg,30,velocityUnits::pct);
+
+        //second part platform
+
+        
+
+       // turnRight(40, 223, 0); //turn to the flag and shoot
+
+        //turnRight(40, 223, 0); //turn to the flag and shoot
+
+        //brakeHold();*/
+        task::sleep(250);
+        turnRight(30,228,0);//Final Aiming Turn
+
+        //Probably Should make this sonar
+        //SONA VERSION:
+
+        /*task::sleep(400);
+        BackL.spin(directionType::rev, 10, velocityUnits::pct);
+        FrontL.spin(directionType::rev, 10, velocityUnits::pct);
+        BackR.spin(directionType::fwd, 10, velocityUnits::pct);
+        FrontR.spin(directionType::fwd, 10, velocityUnits::pct);
+        while(SonaR.distance(distanceUnits::cm) < 170) {
+            
+        }*/
+
+        vex::task::sleep(50);
+
+        
+        brakeHold();
+        intakeInAuton();
+        loader.spin(directionType::fwd,70,velocityUnits::pct);
+        task::sleep(5000);
+        
+        
+        //turnRight(40, 200, 0); //turn to high platform
+        /*turnRight(90);
+        currGyro = GyroClimb.value(rotationUnits::deg);
+        while(fmax(currGyro - GyroClimb.value(rotationUnits::deg), -1*(currGyro - GyroClimb.value(rotationUnits::deg))) < 2) {
+            BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);  //move forward to square and climb up the low platform
+            FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            vex::task::sleep(25);
+        }
+        flipper.rotateTo(0, rotationUnits::deg, 100, velocityUnits::pct, false);
+        while(fmax(currGyro - GyroClimb.value(rotationUnits::deg), -1*(currGyro - GyroClimb.value(rotationUnits::deg))) > 10) {
+            BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);  //move forward to square and climb up the low platform
+            FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+            vex::task::sleep(25);
+        }
+        task::sleep(75);
+        FrontR.stop(brakeType::hold);
+        FrontL.stop(brakeType::hold);
+        BackR.stop(brakeType::hold);
+        BackL.stop(brakeType::hold);
+        vex::task::sleep(200);       
+        turnRight(40, 223, 0); //turn to the flag and shoot
+
+        intakeInAuton();//SHOOT!!!!!!!!
+        load();
+        task::sleep(3000);*/
+
+            //---------------------------------
+        
+/*
+//Change THIS ONE FOR SWTICHING!!!!
+turnRight(40, 210, 0);//turn to the flag
+
+task::sleep(250);
+
+intake.stop();
+BackR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+FrontR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+BackL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+FrontL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+vex::task::sleep(1200);
+FrontR.stop(brakeType::hold);
+FrontL.stop(brakeType::hold);
+BackR.stop(brakeType::hold);
+BackL.stop(brakeType::hold);
+
+
+
+
+moveBackward(15, 100, 200, 0.91); //back off so turn does not affect the flag
+task::sleep(100);
+
+
+//Change THIS ONE FOR SWTICHING!!!!
+turnLeft(40, 210, 0);//turn to the flag
+
+
+intake.stop();
+task::sleep(100);
+
+frontSquare();
+
+
+
+moveBackward(40, 500, 500, 0.91); //back off and turn right
+task::sleep(100);
+
+//Change THIS ONE FOR SWTICHING!!!!
+turnLeft(25, 250, 0);
+
+
+task::sleep(100);
+moveForward(80, 1000, 500, 0.91);
+frontSquare();
+moveBackward(40, 240, 500, 0.91); //back off and turn right
+task::sleep(100);
+
+//Change THIS ONE FOR SWTICHING!!!!
+turnLeft(25, 230, 0);
+
+
+Brain.resetTimer();
+BackR.spin(vex::directionType::fwd, 35, vex::velocityUnits::pct); //squaring
+FrontR.spin(vex::directionType::fwd, 35, vex::velocityUnits::pct);
+BackL.spin(vex::directionType::fwd, 35, vex::velocityUnits::pct);
+FrontL.spin(vex::directionType::fwd, 35, vex::velocityUnits::pct);
+while(Sona.distance(distanceUnits::cm) > 142 || Brain.timer(timeUnits::sec) < 3) {
+
+}
+BackR.stop();
+FrontR.stop();
+BackL.stop();
+FrontL.stop();
+task::sleep(100);
+turnLeft(30, 200, 0);
+task::sleep(100);
+
+//PLATFORM CODE
+BackR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+FrontR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+BackL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+FrontL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+vex::task::sleep(2000);
+turnRight(10, 5, 0);
+flipper.rotateTo(10, rotationUnits::deg, 50, velocityUnits::pct, false);
+BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct); //squaring
+FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+vex::task::sleep(800);
+//flipper.rotateTo(-10, rotationUnits::deg, 100, velocityUnits::pct, true);
+//flipper.rotateTo(140, rotationUnits::deg, 50, velocityUnits::pct, true);
+
+//moveBackward(20, 100, 200, 0.91);
+BackR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct); //squaring
+FrontR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+BackL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+FrontL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+vex::task::sleep(2250);
+//flipper.rotateTo(-30, rotationUnits::deg, 100, velocityUnits::pct, true);
+vex::task::sleep(0);
+while(BackL.torque(torqueUnits::Nm) * 10 <  7) {
+
+}
+FrontR.stop(brakeType::hold);
+FrontL.stop(brakeType::hold);
+BackR.stop(brakeType::hold);
+BackL.stop(brakeType::hold);
+
+*/
+        
+        
+
+
+        //moveForward(55, 250, 200, 0.91);
+        //intakeInAuton();
+        //shooterUp();
+        /*moveBackward(55, 1300, 500, 0.91);
+        task::sleep(2000);
+        turnRight(40, 185, 0);
+        task::sleep(2000);
+        intakeUpAuton();
+        loadUpAuton();
+        task::sleep(250);
+        turnLeft(40, 185, 0);
+        task::sleep(2000);
+        moveForward(40, 500, 500, 0.91);
+        task::sleep(2000);
+        turnLeft(40, 185, 0);
+        task::sleep(2000);
+        moveForward(100, 100, 200, 0.91);
+        task::sleep(2000);
+        turnRight(40, 185, 0);
+        moveForward(100, 750, 500, 0.91);*/
+
+
+
+
+    }
+    else if(autonRedF) {
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("Left Auton");
+
+        shooterUp(); //prep for the start of front auton
+        loadDownAuton();
+        intakeInAuton();
+
+        moveForward(80, 1000, 500, 0.91,true); //move forward, take the ball, move backward
+        task::sleep(250);
+        moveBackward(80, 1000, 500, 0.91);
+
+        backSquare();
+
+
+        moveForward(25, 125, 60, 0.91, true); //move forward, turn left and aim at the high flag
+        task::sleep(150);
+        intake.stop();
+        turnLeft(40, 185, 0);
+        task::sleep(200);
+
+        loadUpAuton(); //SHOOT HIGH FLAG!!!!
+        vex::task::sleep(550);
+        loadDownAuton(); //and reset
+
+        moveForward(80, 700, 500, 0.91, true); //drive to the middle flag and SHOOT MID FLAG
+        task::sleep(350);
+        intakeInAuton();
+        loadUpAuton();
+        task::sleep(750);
+
+        loadDownAuton(); //reset
+        intake.stop();
+
+        turnLeft(10, 20, 0); //slight adjustment and move to hit low flag, square
+        intakeInAuton();
+        frontSquare();
+        shooter.stop(brakeType::coast); //let fly wheel fly
+
+        moveBackward(80, 820, 500, 0.91); //move back and turn to face the cap closer to the flag
+    } else if(autonRedB) {
+        intakeInAuton();
+        vex::task::sleep(100);
+        moveForward(40, 800, 500, 0.91, true);
+        flipper.rotateTo(30,rotationUnits::deg,20,velocityUnits::pct,false);
+        intake.stop();
+        vex::task::sleep(100);
+        moveBackward(40, 200, 100, 0.91);
+        vex::task::sleep(100);
+        turnLeft(130);
+        vex::task::sleep(100);
+        moveBackward(30, 300, 200,0.91);
+        flipper.rotateTo(550, rotationUnits::deg, 50, velocityUnits::pct, false);
+        vex::task::sleep(100);
+        moveForward(30, 300, 200, 0.91,true);
+        vex::task::sleep(100);
+        turnLeft(80);
+        vex::task::sleep(100);
+        moveForward(80, 400, 500, 0.91,true);
+        vex::task::sleep(100);
+        flipper.rotateTo(850, rotationUnits::deg, 50, velocityUnits::pct, true);
+        moveBackward(40, 200, 200, 0.91);
+        vex::task::sleep(100);
+        flipper.rotateTo(50, rotationUnits::deg, 50, velocityUnits::pct, false);
+        vex::task::sleep(100);
+        turnRight(135);
+        vex::task::sleep(100);
+        load();
+    } else if(autonBlueF) {
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.setCursor(1,0);
+        Brain.Screen.print("Right Auton");
+
+
+        shooterUp(); //prep for the start of front auton
+        loadDownAuton();
+        intakeInAuton();
+     
+      //  moveForward(80, 1000, 500, 0.91,true); //move forward, take the ball, move backward
+        task::sleep(1250);
+       // moveBackward(80, 1000, 500, 0.91);
+
+        backSquare();
+
+
+        moveForward(25, 125, 60, 0.91, true); //move forward, turn left and aim at the high flag
+        task::sleep(150);
+        intake.stop();
+        turnRight(40, 185, 0);
+        task::sleep(200);
+
+        loadUpAuton(); //SHOOT HIGH FLAG!!!!
+        vex::task::sleep(550);
+        loadDownAuton(); //and reset
+
+        moveForward(80, 700, 500, 0.91, true); //drive to the middle flag and SHOOT MID FLAG
+        task::sleep(350);
+        intakeInAuton();
+        loadUpAuton();
+        task::sleep(750);
+
+        loadDownAuton(); //reset
+        intake.stop();
+
+        turnRight(10, 20, 0); //slight adjustment and move to hit low flag, square
+        intakeInAuton();
+        frontSquare();
+        shooter.stop(brakeType::coast); //let fly wheel fly
+
+        moveBackward(80, 820, 500, 0.91); //move back and turn to face the cap closer to the flag
+
+    } 
+    else if(autonBlueB) {
+        loader.spin(directionType::rev,50,velocityUnits::pct);
+        //Starts intake
+       // intakeInAuton()
+        
+
+        intakeInAuton();
+        vex::task::sleep(100);
+        moveForward(40, 800, 500, 0.91, true);
+        flipper.rotateTo(30,rotationUnits::deg,20,velocityUnits::pct,false);
+        intake.stop();
+        vex::task::sleep(100);
+        moveBackward(40, 200, 100, 0.91);
+        vex::task::sleep(100);
+        turnRight(130);
+        vex::task::sleep(100);
+        moveBackward(30, 300, 200,0.91);
+        flipper.rotateTo(550, rotationUnits::deg, 50, velocityUnits::pct, false);
+        vex::task::sleep(100);
+        moveForward(30, 300, 200, 0.91,true);
+        vex::task::sleep(100);
+        turnRight(80);
+        vex::task::sleep(100);
+        moveForward(80, 400, 500, 0.91,true);
+        vex::task::sleep(100);
+        flipper.rotateTo(850, rotationUnits::deg, 50, velocityUnits::pct, true);
+        moveBackward(40, 200, 200, 0.91);
+        vex::task::sleep(100);
+        flipper.rotateTo(50, rotationUnits::deg, 50, velocityUnits::pct, false);
+        vex::task::sleep(100);
+        turnLeft(135);
+        vex::task::sleep(100);
+        load();
+        task::sleep(2000);
+    } 
+    else{
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setPenColor(white);
+        Brain.Screen.printAt(5,38,"No Auton");
+        Brain.Screen.printAt(55,140,"Selected");
+        disableAuton = true;
+        task::sleep(500);
+    }
+
+}
+
+void usercontrol( void ) 
+{
+    while(disableUC){
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFillColor(blue);
+        Brain.Screen.setPenColor(white);
+        Brain.Screen.printAt(5,38,"UC Disabled. Why is controller");
+        Brain.Screen.printAt(5,58,"Connected? Right mode?");
+        task::sleep(200);
+    }
+    vex::task disp(display);
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.printAt(5,38,"Waiting for arm");
+    userInitArm(41);
+    Brain.Screen.clearLine();
+    //userInitArm(50);
+    //vex::task a(ballStateManager);
+    //vex::task e(LEDManager);
+    vex::task d(intakeManager);
+    //vex::task b(display);
+    vex::task c(buzzer);
+    //vex::task f(Flash);
+    vex::task g(drive);
+    loader.spin(directionType::rev, 35, velocityUnits::pct);
+    shooter.spin(directionType::fwd, 500, velocityUnits::rpm);
+
+    while(true){
+        if(con.ButtonUp.pressing()) 
+        {
+            shooterUp();
+            vex::task::sleep(250);
+        }
+
+        if(con.ButtonX.pressing()) 
+        {
+            flipAndSuck();
+            vex::task::sleep(250);
+        }
+
+        if(con.ButtonDown.pressing()) 
+        {
+            shooterDown();
+            vex::task::sleep(250);
+        }
+        if(con.ButtonR1.pressing()) 
+        {
+            vex::task shoot(load);
+            vex::task::sleep(250);
+        }
+        if(con.ButtonR2.pressing())
+        {
+            vex::task v(slowAndShootMid);
+        }
+        if(con.ButtonX.pressing())
+        {
+            whiteLight.spin(directionType::fwd,100,velocityUnits::pct);
+            redLight.spin(directionType::fwd,100,velocityUnits::pct);
+        }
+        if(con.Axis2.position(percentUnits::pct) > 10) 
+        {
+            flipper.spin(directionType::fwd, con.Axis2.position(percentUnits::pct), velocityUnits::pct);
+        }   
+        else if(con.Axis2.position(percentUnits::pct) < 10 && flipper.rotation(rotationUnits::deg) > 0) 
+        {
+            flipper.spin(directionType::fwd, con.Axis2.position(percentUnits::pct), velocityUnits::pct);
+        }   
+        else if(flipper.rotation(rotationUnits::deg) < 0)
+        { 
+            flipper.rotateTo(0,rotationUnits::deg,10,velocityUnits::pct);
+        }
+        else{
+            flipper.stop(brakeType::hold);
+        }
+            vex::task::sleep(20); 
+    }
+} 
+
+//THIS IS THE REST OF OS
+void OSPressed() {
+    while(!Brain.Screen.pressing()){
+        
+    }
+    task::sleep(500);
+    if(Brain.Screen.xPosition() > 0 && Brain.Screen.xPosition() < 160 && Brain.Screen.yPosition() > 55 && Brain.Screen.yPosition() < 148) {
+        calibrate();
+    } else if((Brain.Screen.xPosition() > 160 && Brain.Screen.xPosition() < 320 && Brain.Screen.yPosition() > 55 && Brain.Screen.yPosition() < 148)) {
+        select();
+    } else if((Brain.Screen.xPosition() > 320 && Brain.Screen.xPosition() < 480 && Brain.Screen.yPosition() > 55 && Brain.Screen.yPosition() < 148)) {
+        Brain.Screen.clearScreen(green);
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.setCursor(3,0);
+        Brain.Screen.print("Click Skills");
+        autonSkills = true;
+        disableUC = true;
+        disableAuton = false;
+        autonomous();
+        //autonSkills = false;
+    } else if((Brain.Screen.xPosition() > 0 && Brain.Screen.xPosition() < 160 && Brain.Screen.yPosition() > 148 && Brain.Screen.yPosition() < 240)) {
+        Brain.Screen.clearScreen(green);
+        Brain.Screen.setFont(fontType::mono60);
+        Brain.Screen.setCursor(3,0);
+        Brain.Screen.print("Click UC");
+        disableUC = false;
+        disableAuton = true;
+        usercontrol();
+    } else if((Brain.Screen.xPosition() > 160 && Brain.Screen.xPosition() < 320 && Brain.Screen.yPosition() > 148 && Brain.Screen.yPosition() < 240)) {
+        if(!autonRedF && !autonBlueF && !autonRedB && !autonBlueB && !autonSkills){
+            initOS("No Auton Selected");
+        }
+        else{
+            Brain.Screen.clearScreen(green);
+            Brain.Screen.setFont(fontType::mono60);
+            Brain.Screen.setCursor(3,0);
+            Brain.Screen.print("Click Auton");
+            disableUC = true;
+            disableAuton = false;
+            autonomous();
+        }
+       
+    } else if((Brain.Screen.xPosition() > 320 && Brain.Screen.xPosition() < 480 && Brain.Screen.yPosition() > 148 && Brain.Screen.yPosition() < 240)) {
+        if(!autonRedF && !autonBlueF && !autonRedB && !autonBlueB && !autonSkills){
+            initOS("No Auton Selected");
+        }
+        else{
+            Brain.Screen.clearScreen(green);
+            Brain.Screen.setFont(fontType::mono60);
+            Brain.Screen.setCursor(3,0);
+            Brain.Screen.print("Click Comp");
+            disableUC = false;
+            disableAuton = false;
+            Competition1.autonomous( autonomous );
+            Competition1.drivercontrol( usercontrol );
+        }
+        
+    }
+    task::sleep(1000);
+}
+
+void OS() {
+        while(disableUC && disableAuton) {
+            initOS();   
+            OSPressed();
+            task::sleep(50);
+        }
+        if(!disableUC && !disableAuton){
+            Brain.Screen.clearScreen();
+            Brain.Screen.setFont(fontType::mono60);
+            Brain.Screen.setFillColor(red);
+            Brain.Screen.setPenColor(white);
+            Brain.Screen.setCursor(3,0);
+            Brain.Screen.print("Comp Loaded");
+        }
+        else if(!disableUC){
+            Brain.Screen.clearScreen();
+            Brain.Screen.setFont(fontType::mono60);
+            Brain.Screen.setFillColor(red);
+            Brain.Screen.setPenColor(white);
+            Brain.Screen.setCursor(3,0);
+            Brain.Screen.print("UC Loaded");
+        }
+        else if(!disableAuton){
+            Brain.Screen.clearScreen();
+            Brain.Screen.setFont(fontType::mono60);
+            Brain.Screen.setFillColor(red);
+            Brain.Screen.setPenColor(white);
+            Brain.Screen.setCursor(3,0);
+            Brain.Screen.print("Auton Loaded");
+        }
+}
+
+int main() 
+{   
+    //usercontrol();
+    //pre_auton();
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(fontType::mono40);
+    Brain.Screen.setFillColor(red);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setCursor(3,0);
+    Brain.Screen.print("Gyro Calibration");
+    task::sleep(500);
+    Brain.Screen.clearLine();
+    Brain.Screen.print("Gyro Calibration Started");
+    Gyro1.startCalibration();
+    while(Gyro1.isCalibrating()){}
+    GyroClimb.startCalibration();
+    while(GyroClimb.isCalibrating()){}
+    task::sleep(500);
+    Brain.Screen.clearLine();
+    Brain.Screen.print("Gyro Calibration Done");
+    OS();
+    
+    //vex::task xyz(OS);
+    //select();
+    //Competition1.autonomous( autonomous );
+    //Competition1.drivercontrol( usercontrol );
+
+
+    while(1) 
+    {
+        vex::task::sleep(100);
+    } 
+}
