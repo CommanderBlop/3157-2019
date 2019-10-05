@@ -24,6 +24,25 @@ vex::brain       Brain;
 vex::controller con(vex::controllerType::primary);
 // define your global instances of motors and other devices here
 
+void raiseBar(int x) {
+  bar.rotateTo(x, rotationUnit::deg, 75, vex::velocityUnits::pct);
+  
+}
+
+void dropBar(int x) {
+  bar.rotateTo(x, rotationUnit::deg, 75, vex::velocityUnits::pct);
+
+}
+
+void raiseAngler(int x) {
+  angler.rotateTo(x, rotationUnit::deg, 23, vex::velocityUnits::pct)
+
+}
+
+void dropAngler(int x) {
+  angler.rotateTo(x, rotationUnit::deg, 23, vex::velocityUnits::pct)
+}
+ 
 int main() {
    
     while(1) {
@@ -59,5 +78,24 @@ int main() {
           bar.stop(brakeType::brake);
         }
 
-    }
+        if(con.ButtonA.pressing()) {
+          raiseBar();
+          task::sleep(30);
+        }
+
+        if(con.ButtonB.pressing()) {
+          dropBar();
+          task::sleep(30);
+        }
+
+        if(con.ButtonX.pressing()) {
+          raiseAngler();
+          task::sleep(30);
+        }
+
+        if(con.ButtonY.pressing()) {
+          dropAngler();
+          task::sleep(30);
+        }
+      }
 }
