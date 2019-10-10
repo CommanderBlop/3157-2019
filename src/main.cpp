@@ -16,8 +16,8 @@ vex::motor      BackL(vex::PORT3, vex::gearSetting::ratio18_1, false);
 vex::motor      FrontL(vex::PORT4, vex::gearSetting::ratio18_1, false);
 vex::motor      intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
 vex::motor      intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
-vex::motor      angler(vex::PORT5, vex::gearSetting::ratio18_1, false);
-vex::motor      bar(vex::PORT6, vex::gearSetting::ratio6_1, true);
+vex::motor      angler(vex::PORT5, vex::gearSetting::ratio36_1, false);
+vex::motor      bar(vex::PORT6, vex::gearSetting::ratio36_1, true);
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 vex::brain       Brain;
@@ -25,19 +25,22 @@ vex::controller con(vex::controllerType::primary);
 // define your global instances of motors and other devices here
 
 void raiseBar() {
-  bar.rotateTo(90, rotationUnits::deg, 75, vex::velocityUnits::pct);
+  //bar.rotateTo(90, rotationUnits::deg, 75, vex::velocityUnits::pct);
 }
 
 void dropBar() {
-  bar.rotateTo(20, rotationUnits::deg, 75, vex::velocityUnits::pct);
+
+  //bar.rotateTo(20, rotationUnits::deg, 75, vex::velocityUnits::pct);
 }
 
 void raiseAngler() {
-  angler.rotateTo(90, rotationUnits::deg, 23, vex::velocityUnits::pct);
+
+  //angler.rotateTo(90, rotationUnits::deg, 23, vex::velocityUnits::pct);
 }
 
 void dropAngler() {
-  angler.rotateTo(20, rotationUnits::deg, 23, vex::velocityUnits::pct);
+
+  //angler.rotateTo(20, rotationUnits::deg, 23, vex::velocityUnits::pct);
 }
  
 int main() {
@@ -47,12 +50,21 @@ int main() {
         FrontR.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
         FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
         
+        float angleA = angler.rotation(rotationUnits::deg);
+        float angleB = bar.rotation(rotationUnits::deg);
+
+        Brain.Screen.setFont(fontType::mono20);
+        Brain.Screen.setCursor(1,1);
+        Brain.Screen.print("Angler Angle: %3.1f", angleA);
+        Brain.Screen.newLine();
+        Brain.Screen.print("Bar Angle: %3.1f", angleB);
+
         if(con.ButtonL1.pressing()) {
-          intakeL.spin(vex::directionType::fwd, 25, vex::velocityUnits::pct);
-          intakeR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+          intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
+          intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
         } else if(con.ButtonL2.pressing()) {
-          intakeL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
-          intakeR.spin(vex::directionType::fwd, 25, vex::velocityUnits::pct);
+          intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
+          intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
         } else {
           intakeL.stop(brakeType::hold);
           intakeR.stop(brakeType::hold);
@@ -67,13 +79,13 @@ int main() {
         }
 
         if(con.ButtonUp.pressing()) {
-          bar.spin(directionType::fwd, 100, velocityUnits::pct);
-        } else if(con.ButtonDown.pressing()) {
           bar.spin(directionType::rev, 100, velocityUnits::pct);
+        } else if(con.ButtonDown.pressing()) {
+          bar.spin(directionType::fwd, 100, velocityUnits::pct);
         } else {
           bar.stop(brakeType::brake);
         }
-
+        /*
         if(con.ButtonA.pressing()) {
           raiseBar();
           task::sleep(30);
@@ -93,5 +105,6 @@ int main() {
           dropAngler();
           task::sleep(30);
         }
+        */
       }
 }
