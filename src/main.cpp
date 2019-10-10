@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       commanderblop                                             */
-/*    Created:      Sat Oct 05 2019                                           */
+/*    Author:       C:\Users\LongJiakai                                       */
+/*    Created:      Tue Oct 01 2019                                           */
 /*    Description:  V5 project                                                */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
@@ -10,87 +10,88 @@
 
 using namespace vex;
 
+vex::motor      BackR(vex::PORT1, vex::gearSetting::ratio18_1, true);
+vex::motor      FrontR(vex::PORT2, vex::gearSetting::ratio18_1, true);
+vex::motor      BackL(vex::PORT3, vex::gearSetting::ratio18_1, false);
+vex::motor      FrontL(vex::PORT4, vex::gearSetting::ratio18_1, false);
+vex::motor      intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
+vex::motor      intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
+vex::motor      angler(vex::PORT5, vex::gearSetting::ratio18_1, false);
+vex::motor      bar(vex::PORT6, vex::gearSetting::ratio6_1, true);
+
 // A global instance of vex::brain used for printing to the V5 brain screen
 vex::brain       Brain;
-// A global instance of vex::competition
-vex::competition Competition;
-
+vex::controller con(vex::controllerType::primary);
 // define your global instances of motors and other devices here
 
-
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  You may want to perform some actions before the competition starts.      */
-/*  Do them in the following function.  You must return from this function   */
-/*  or the autonomous and usercontrol tasks will not be started.  This       */
-/*  function is only called once after the cortex has been powered on and    */ 
-/*  not every time that the robot is disabled.                               */
-/*---------------------------------------------------------------------------*/
-
-void pre_auton( void ) {
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
-  
+void raiseBar() {
+  bar.rotateTo(90, rotationUnits::deg, 75, vex::velocityUnits::pct);
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
-void autonomous( void ) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
-
+void dropBar() {
+  bar.rotateTo(20, rotationUnits::deg, 75, vex::velocityUnits::pct);
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
+void raiseAngler() {
+  angler.rotateTo(90, rotationUnits::deg, 23, vex::velocityUnits::pct);
+}
 
-void usercontrol( void ) {
-  // User control code here, inside the loop
-  while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo 
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to 
-    // update your motors, etc.
-    // ........................................................................
+void dropAngler() {
+  angler.rotateTo(20, rotationUnits::deg, 23, vex::velocityUnits::pct);
+}
  
-    vex::task::sleep(20); //Sleep the task for a short amount of time to prevent wasted resources. 
-  }
-}
-
-//
-// Main will set up the competition functions and callbacks.
-//
 int main() {
-    //Set up callbacks for autonomous and driver control periods.
-    Competition.autonomous( autonomous );
-    Competition.drivercontrol( usercontrol );
-    
-    //Run the pre-autonomous function. 
-    pre_auton();
-       
-    //Prevent main from exiting with an infinite loop.                        
     while(1) {
-      vex::task::sleep(100);//Sleep the task for a short amount of time to prevent wasted resources.
-    }    
-       
+        BackL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
+        BackR.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
+        FrontR.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
+        FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
+        
+        if(con.ButtonL1.pressing()) {
+          intakeL.spin(vex::directionType::fwd, 25, vex::velocityUnits::pct);
+          intakeR.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+        } else if(con.ButtonL2.pressing()) {
+          intakeL.spin(vex::directionType::rev, 25, vex::velocityUnits::pct);
+          intakeR.spin(vex::directionType::fwd, 25, vex::velocityUnits::pct);
+        } else {
+          intakeL.stop(brakeType::hold);
+          intakeR.stop(brakeType::hold);
+        }
+
+        if(con.ButtonR1.pressing()) {
+          angler.spin(vex::directionType::fwd, 20, vex::velocityUnits::pct);
+        } else if(con.ButtonR2.pressing()) {
+          angler.spin(directionType::rev, 20, velocityUnits::pct);
+        } else {
+          angler.stop(brakeType::brake);
+        }
+
+        if(con.ButtonUp.pressing()) {
+          bar.spin(directionType::fwd, 100, velocityUnits::pct);
+        } else if(con.ButtonDown.pressing()) {
+          bar.spin(directionType::rev, 100, velocityUnits::pct);
+        } else {
+          bar.stop(brakeType::brake);
+        }
+
+        if(con.ButtonA.pressing()) {
+          raiseBar();
+          task::sleep(30);
+        }
+
+        if(con.ButtonB.pressing()) {
+          dropBar();
+          task::sleep(30);
+        }
+
+        if(con.ButtonX.pressing()) {
+          raiseAngler();
+          task::sleep(30);
+        }
+
+        if(con.ButtonY.pressing()) {
+          dropAngler();
+          task::sleep(30);
+        }
+      }
 }
