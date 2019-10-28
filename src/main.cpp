@@ -3,7 +3,7 @@
 /*    Module:       main.cpp                                                  */
 /*    Author:       C:\Users\LongJiakai                                       */
 /*    Created:      Tue Oct 01 2019                                           */
-/*    Description:  V5 project                                                */
+/*    Description:  1 block = 1.8 rev                                              */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 #include "vex.h"
@@ -15,20 +15,22 @@ competition Competition1;
 vex::brain Brain;
 vex::controller con(vex::controllerType::primary);
 // define your global instances of motors and other devices here
-vex::motor BackR(vex::PORT1, vex::gearSetting::ratio18_1, true);
-vex::motor FrontR(vex::PORT2, vex::gearSetting::ratio18_1, true);
-vex::motor BackL(vex::PORT3, vex::gearSetting::ratio18_1, false);
-vex::motor FrontL(vex::PORT4, vex::gearSetting::ratio18_1, false);
+vex::motor BackR(vex::PORT2, vex::gearSetting::ratio18_1, true);
+vex::motor FrontR(vex::PORT12, vex::gearSetting::ratio18_1, true);
+vex::motor BackL(vex::PORT19, vex::gearSetting::ratio18_1, false);
+vex::motor FrontL(vex::PORT7, vex::gearSetting::ratio18_1, false);
 vex::motor intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
 vex::motor intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
 vex::motor angler(vex::PORT5, vex::gearSetting::ratio36_1, false);
-vex::motor bar(vex::PORT6, vex::gearSetting::ratio36_1, true);
+vex::motor bar(vex::PORT3, vex::gearSetting::ratio36_1, true);
 
 vex::gyro Gyro = vex::gyro(Brain.ThreeWirePort.C);
 
 double buffer = 1.0;
 bool lastMovedFwd;
+bool reverse = false;
 
+int mode = 0;
 bool autonBlue1 = false;
 bool autonRed1 = false;
 bool autonBlue2 = false;
@@ -37,6 +39,8 @@ bool autonSkills = false;
 
 bool disableAuton = true;
 bool disableUC = true;
+
+
 
 // Operating System
 
@@ -171,6 +175,7 @@ void intakeIn() {
   intakeR.spin(directionType::rev, 75, velocityUnits::pct);
   intakeL.spin(directionType::rev, 75, velocityUnits::pct);
 }
+
 void intakeOut() {
   intakeR.spin(directionType::fwd, 75, velocityUnits::pct);
   intakeL.spin(directionType::fwd, 75, velocityUnits::pct);
@@ -452,135 +457,178 @@ int drive() {
   }
 }
 
-void barD() {
-  if (con.ButtonUp.pressing()) {
-    bar.spin(directionType::rev, 100, velocityUnits::pct);
-  } else if (con.ButtonDown.pressing()) {
-    bar.spin(directionType::fwd, 100, velocityUnits::pct);
-  } else {
-    bar.stop(brakeType::brake);
+int display()
+{float angleA = angler.rotation(rotationUnits::deg);
+    float angleB = bar.rotation(rotationUnits::deg);
+    float rotateFL = FrontL.rotation(rotationUnits::deg);
+   while(true)
+   {
+     
+   Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(fontType::mono40);
+   /* Brain.Screen.printAt(5, 38, "Angler Angle: %3.1f", angleA);
+    
+    Brain.Screen.printAt(5, 98, "Bar Angle: %3.1f", angleB);*/
+    
+    Brain.Screen.printAt(5,98,"Drive Rot: %3.1f", rotateFL);
+
+    vex::task::sleep(500);
+   }
+}
+
+void autonomous(void) {
+  while (disableAuton) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.printAt(5, 38, "Auton Disabled");
+    task::sleep(200);
+  }
+
+  if (autonSkills) {
+
+  }
+
+  // Route 1 - 5 Points
+
+  else if (autonRed1) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(fontType::mono60);
+    Brain.Screen.setCursor(1, 0);
+    Brain.Screen.print(" Red Route 1");
+
+    // Start Between R1-5 R1-6
+
+    // move forward + flip out
+
+    // suck preload
+
+    // suck four cubes R2-5 to R3-5
+
+    // Score
+  }
+
+  // Route 2 - 6 Points
+
+  else if (autonRed2) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(fontType::mono60);
+    Brain.Screen.setCursor(1, 0);
+    Brain.Screen.print("Red Route 2");
+
+    // Start Between R1-2
+
+    // expand
+
+    // suck preload
+
+    // suck R2-2
+
+    // suck 2 of R3-2
+
+    // turn around R2-1
+
+    // Score
+  }
+
+  else if (autonBlue1) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(fontType::mono60);
+    Brain.Screen.setCursor(1, 0);
+    Brain.Screen.print("Blue Route 1");
+  }
+
+  else if (autonBlue2) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(fontType::mono60);
+    Brain.Screen.setCursor(1, 0);
+    Brain.Screen.print("Blue Route 2");
   }
 }
 
-void intakeD() {
-  if (con.ButtonL1.pressing()) {
-    intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-    intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-  } else if (con.ButtonL2.pressing()) {
-    intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-    intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-  } else {
-    intakeL.stop(brakeType::hold);
-    intakeR.stop(brakeType::hold);
+void usercontrol() {
+  while (disableUC) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(blue);
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.printAt(5, 38, "UC Disabled. Why is controller");
+    Brain.Screen.printAt(5, 58, "Connected? Right mode?");
+    task::sleep(200);
   }
-}
 
-void anglerD() {
+  while (true) {
+   
+    vex::task a(display);
 
-  if (con.ButtonR1.pressing()) {
-    angler.spin(vex::directionType::fwd, 20, vex::velocityUnits::pct);
-  } else if (con.ButtonR2.pressing()) {
-    angler.spin(directionType::rev, 20, velocityUnits::pct);
-  } else {
-    angler.stop(brakeType::brake);
+    vex::task g(drive);
+
+    if (con.ButtonL1.pressing()) 
+    {
+      intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
+      intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
+    } 
+    if(con.ButtonL2.pressing()) 
+    {
+      intakeL.spin(vex::directionType::rev, 20, vex::velocityUnits::pct);
+      intakeR.spin(vex::directionType::fwd, 20, vex::velocityUnits::pct);
+    } 
+    if(!(con.ButtonL1.pressing()) && !(con.ButtonL2.pressing()))
+    {
+      intakeL.stop(brakeType::hold);
+      intakeR.stop(brakeType::hold);
+    }
+
+    if (con.ButtonR1.pressing()) 
+    {
+      angler.spin(vex::directionType::fwd, 20, vex::velocityUnits::pct);
+    } 
+    if (con.ButtonR2.pressing()) 
+    {
+      angler.spin(directionType::rev, 20, velocityUnits::pct);
+    } 
+    if (!(con.ButtonR1.pressing()) && !(con.ButtonR2.pressing()))
+    {
+      angler.stop(brakeType::brake);
+    }
+    if(con.ButtonA.pressing())
+    {
+      angler.setVelocity(20, velocityUnits::pct);
+      angler.rotateTo(0, rotationUnits::deg);
+    }
+    if(con.ButtonB.pressing())
+    {
+      angler.setVelocity(20, velocityUnits::pct);
+      angler.rotateTo(-240, rotationUnits::deg);
+    }
+
+    if (con.ButtonUp.pressing()) 
+    {
+    bar.spin(directionType::rev, 50, velocityUnits::pct);
+    } 
+    if (con.ButtonDown.pressing()) 
+    {
+    bar.spin(directionType::fwd, 50, velocityUnits::pct);
+    } 
+    if (!(con.ButtonUp.pressing()) && !(con.ButtonDown.pressing()))
+    {
+    bar.stop(brakeType::hold);
+    }
+
+    if(con.ButtonRight.pressing())
+    {
+      disableUC = false;
+    }
   }
-}
-
-void autonomous( void )
-{
-  while(disableAuton){
-        Brain.Screen.clearScreen();
-        Brain.Screen.setFillColor(blue);
-        Brain.Screen.setPenColor(white);
-        Brain.Screen.printAt(5,38,"Auton Disabled");
-        task::sleep(200);
-  }
-  
-  if(autonSkills)
-    {
-
-    }
-
-    //Route 1 - 5 Points
-
-    else if(autonRed1)
-    {
-      Brain.Screen.clearScreen();
-      Brain.Screen.setFont(fontType::mono60);
-      Brain.Screen.setCursor(1,0);
-      Brain.Screen.print(" Red Route 1");
-
-      //Start Between R1-5 R1-6
-
-      //move forward + flip out
-
-      //suck preload
-
-      //suck four cubes R2-5 to R3-5
-
-      //Score
-    }
-
-    //Route 2 - 6 Points
-
-    else if(autonRed2)
-    {
-      Brain.Screen.clearScreen();
-      Brain.Screen.setFont(fontType::mono60);
-      Brain.Screen.setCursor(1,0);
-      Brain.Screen.print("Red Route 2");
-
-      //Start Between R1-2
-
-      //expand
-
-      //suck preload
-
-      //suck R2-2
-
-      //suck 2 of R3-2
-
-      //turn around R2-1
-
-      //Score
-    }
-
-    else if(autonBlue1)
-    {
-      Brain.Screen.clearScreen();
-      Brain.Screen.setFont(fontType::mono60);
-      Brain.Screen.setCursor(1,0);
-      Brain.Screen.print("Blue Route 1");
-    }
-
-    else if(autonBlue2)
-    {
-      Brain.Screen.clearScreen();
-      Brain.Screen.setFont(fontType::mono60);
-      Brain.Screen.setCursor(1,0);
-      Brain.Screen.print("Blue Route 2");
-    }
-}
-
-void usercontrol()
-{
-    while(disableUC){
-        Brain.Screen.clearScreen();
-        Brain.Screen.setFillColor(blue);
-        Brain.Screen.setPenColor(white);
-        Brain.Screen.printAt(5,38,"UC Disabled. Why is controller");
-        Brain.Screen.printAt(5,58,"Connected? Right mode?");
-        task::sleep(200);
-    }
 }
 
 void OSPressed() {
   while (!Brain.Screen.pressing()) {
   }
   task::sleep(500);
-  if ((Brain.Screen.xPosition() > 160 &&
-              Brain.Screen.xPosition() < 320 && Brain.Screen.yPosition() > 55 &&
-              Brain.Screen.yPosition() < 148)) {
+  if ((Brain.Screen.xPosition() > 160 && Brain.Screen.xPosition() < 320 &&
+       Brain.Screen.yPosition() > 55 && Brain.Screen.yPosition() < 148)) {
     select();
   } else if ((Brain.Screen.xPosition() > 320 &&
               Brain.Screen.xPosition() < 480 && Brain.Screen.yPosition() > 55 &&
@@ -675,7 +723,7 @@ void OS() {
 // Main
 
 int main() {
-/*
+
   Brain.Screen.clearScreen();
   Brain.Screen.setFont(fontType::mono40);
   Brain.Screen.setFillColor(red);
@@ -687,18 +735,10 @@ int main() {
   Brain.Screen.print("Gyro Calibration Started");
   Gyro.startCalibration();
 
-  OS();*/
+  OS();
 
-  while (1) {
-    drive();
-
-    float angleA = angler.rotation(rotationUnits::deg);
-    float angleB = bar.rotation(rotationUnits::deg);
-
-    Brain.Screen.setFont(fontType::mono20);
-    Brain.Screen.setCursor(1, 1);
-    Brain.Screen.print("Angler Angle: %3.1f", angleA);
-    Brain.Screen.newLine();
-    Brain.Screen.print("Bar Angle: %3.1f", angleB);
+  while (1) 
+  {
+    vex::task::sleep(100);
   }
 }
