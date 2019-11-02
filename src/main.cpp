@@ -6,7 +6,7 @@
 /*    Description:  1 block = 1.8 rev                                              */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-#include "vex.h"
+#include "vex.h"             
 
 using namespace vex;
 competition Competition1;
@@ -17,12 +17,12 @@ vex::controller con(vex::controllerType::primary);
 // define your global instances of motors and other devices here
 vex::motor BackR(vex::PORT2, vex::gearSetting::ratio18_1, true);
 vex::motor FrontR(vex::PORT12, vex::gearSetting::ratio18_1, true);
-vex::motor BackL(vex::PORT19, vex::gearSetting::ratio18_1, false);
-vex::motor FrontL(vex::PORT7, vex::gearSetting::ratio18_1, false);
+vex::motor BackL(vex::PORT10, vex::gearSetting::ratio18_1, false);
+vex::motor FrontL(vex::PORT19, vex::gearSetting::ratio18_1, false);
 vex::motor intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
 vex::motor intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
-vex::motor angler(vex::PORT5, vex::gearSetting::ratio36_1, false);
-vex::motor bar(vex::PORT3, vex::gearSetting::ratio36_1, true);
+vex::motor angler(vex::PORT2, vex::gearSetting::ratio36_1, false);
+vex::motor bar(vex::PORT4, vex::gearSetting::ratio36_1, true);
 
 vex::gyro Gyro = vex::gyro(Brain.ThreeWirePort.C);
 
@@ -170,20 +170,41 @@ void select() {
 }
 
 // Autonomous Functions
+                                             
+void barAuto(int angle, int speed)
+{
+  bar.rotateTo(angle, rotationUnits::deg, speed, velocityUnits::pct, true);
+}
+
+void angRest()
+{
+
+}
+
+void angScore()
+{
+
+}
 
 void intakeIn() {
   intakeR.spin(directionType::rev, 75, velocityUnits::pct);
-  intakeL.spin(directionType::rev, 75, velocityUnits::pct);
-}
-
-void intakeOut() {
-  intakeR.spin(directionType::fwd, 75, velocityUnits::pct);
   intakeL.spin(directionType::fwd, 75, velocityUnits::pct);
 }
 
-void moveForward(double power, double angle, double time, double shawnMendes,
+void intakeOut(int time, int speed) {
+  intakeR.rotateFor(directionType::fwd, time, timeUnits::msec, speed, velocityUnits::pct);
+  intakeL.rotateFor(directionType::rev, time, timeUnits::msec, speed, velocityUnits::pct);
+}
+
+void intakeStop()
+{
+  intakeR.stop(brakeType::hold);
+  intakeL.stop(brakeType::hold);
+}
+
+void moveForward(double power, double revs, double time, double shawnMendes,
                  bool ramp) {
-  if (power < 0 || angle < 0 || time < 0) {
+  if (power < 0 || revs < 0 || time < 0) {
     Brain.Screen.setFillColor(red);
     Brain.Screen.drawRectangle(0, 0, 2000, 2000);
     Brain.Screen.setCursor(3, 2);
@@ -211,9 +232,9 @@ void moveForward(double power, double angle, double time, double shawnMendes,
   }
 
   angleMoved =
-      (BackR.rotation(rotationUnits::deg) + BackL.rotation(rotationUnits::deg) +
-       FrontR.rotation(rotationUnits::deg) +
-       FrontL.rotation(rotationUnits::deg)) /
+      (BackR.rotation(rotationUnits::rev) + BackL.rotation(rotationUnits::rev) +
+       FrontR.rotation(rotationUnits::rev) +
+       FrontL.rotation(rotationUnits::rev)) /
       4;
   if (ramp) {
     angleMoved = angleMoved / 2;
@@ -221,18 +242,18 @@ void moveForward(double power, double angle, double time, double shawnMendes,
   Brain.Screen.setCursor(2, 1);
   Brain.Screen.print(
       "BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",
-      BackR.rotation(rotationUnits::deg), BackL.rotation(rotationUnits::deg),
-      FrontR.rotation(rotationUnits::deg), FrontL.rotation(rotationUnits::deg));
+      BackR.rotation(rotationUnits::rev), BackL.rotation(rotationUnits::rev),
+      FrontR.rotation(rotationUnits::rev), FrontL.rotation(rotationUnits::rev));
   Brain.Screen.setCursor(3, 1);
   Brain.Screen.print("Rampup Angle: %3.1f", angleMoved);
   Brain.Screen.setCursor(4, 1);
-  Brain.Screen.print("MoveFor: %3.1f", (angle - (2 * angleMoved)));
+  Brain.Screen.print("MoveFor: %3.1f", (revs - (2 * angleMoved)));
 
-  if ((angle - (2 * angleMoved)) < 0) {
+  if ((revs - (2 * angleMoved)) < 0) {
     Brain.Screen.setFillColor(red);
     Brain.Screen.drawRectangle(0, 0, 2000, 2000);
     Brain.Screen.setCursor(3, 2);
-    Brain.Screen.print("Error duration is: %3.1f", (angle - (2 * angleMoved)));
+    Brain.Screen.print("Error duration is: %3.1f", (revs - (2 * angleMoved)));
     vex::task::sleep(3000);
   }
 
@@ -241,17 +262,17 @@ void moveForward(double power, double angle, double time, double shawnMendes,
   FrontR.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
   FrontL.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
 
-  while (((BackR.rotation(rotationUnits::deg) +
-           BackL.rotation(rotationUnits::deg) +
-           FrontR.rotation(rotationUnits::deg) +
-           FrontL.rotation(rotationUnits::deg)) /
-          4) < (angle - (2 * angleMoved))) {
+  while (((BackR.rotation(rotationUnits::rev) +
+           BackL.rotation(rotationUnits::rev) +
+           FrontR.rotation(rotationUnits::rev) +
+           FrontL.rotation(rotationUnits::rev)) /
+          4) < (revs - (2 * angleMoved))) {
     Brain.Screen.setCursor(5, 1);
     Brain.Screen.print("Currently: %3.1f",
-                       ((BackR.rotation(rotationUnits::deg) +
-                         BackL.rotation(rotationUnits::deg) +
-                         FrontR.rotation(rotationUnits::deg) +
-                         FrontL.rotation(rotationUnits::deg)) /
+                       ((BackR.rotation(rotationUnits::rev) +
+                         BackL.rotation(rotationUnits::rev) +
+                         FrontR.rotation(rotationUnits::rev) +
+                         FrontL.rotation(rotationUnits::rev)) /
                         4));
   }
 
@@ -276,10 +297,10 @@ void moveForward(double power, double angle, double time, double shawnMendes,
   Brain.Screen.setCursor(7, 1);
   Brain.Screen.print(
       "BR: %3.1f/BL: %3.1f/FR: %3.1f/FL: %3.1f",
-      BackR.rotation(rotationUnits::deg), BackL.rotation(rotationUnits::deg),
-      FrontR.rotation(rotationUnits::deg), FrontL.rotation(rotationUnits::deg));
+      BackR.rotation(rotationUnits::rev), BackL.rotation(rotationUnits::rev),
+      FrontR.rotation(rotationUnits::rev), FrontL.rotation(rotationUnits::rev));
   Brain.Screen.setCursor(8, 1);
-  Brain.Screen.print("Complete fwd(%3.1f,%3.1f,%3.1f)", power, angle, time);
+  Brain.Screen.print("Complete fwd(%3.1f,%3.1f,%3.1f)", power, revs, time);
 
   FrontR.stop(brakeType::hold);
   FrontL.stop(brakeType::hold);
@@ -458,9 +479,10 @@ int drive() {
 }
 
 int display()
-{float angleA = angler.rotation(rotationUnits::deg);
-    float angleB = bar.rotation(rotationUnits::deg);
-    float rotateFL = FrontL.rotation(rotationUnits::deg);
+{
+    //float angleA = angler.rotation(rotationUnits::deg);
+    //float angleB = bar.rotation(rotationUnits::deg);
+    //float rotateFL = FrontL.rotation(rotationUnits::deg);
    while(true)
    {
      
@@ -472,7 +494,7 @@ int display()
     
     Brain.Screen.printAt(5, 98, "Bar Angle: %3.1f", angleB);*/
     
-    Brain.Screen.printAt(5,98,"Drive Rot: %3.1f", rotateFL);
+   // Brain.Screen.printAt(5,98,"Drive Rot: %3.1f", rotateFL);
 
     vex::task::sleep(500);
    }
@@ -487,13 +509,9 @@ void autonomous(void) {
     task::sleep(200);
   }
 
-  if (autonSkills) {
-
-  }
-
   // Route 1 - 5 Points
 
-  else if (autonRed1) {
+    if (autonRed1) {
     Brain.Screen.clearScreen();
     Brain.Screen.setFont(fontType::mono60);
     Brain.Screen.setCursor(1, 0);
@@ -502,12 +520,66 @@ void autonomous(void) {
     // Start Between R1-5 R1-6
 
     // move forward + flip out
+    
+    //barAuto(90, 30);
+    task::sleep(1000);
 
+    barAuto(15, 30);
+    task::sleep(250);
+    //moveForward(30, 1.8, 500, 0.91, true);
+    //task::sleep(250);
+    
     // suck preload
+
+    intakeIn();
+    task::sleep(250);
+
+    angler.stop(brakeType::hold);
 
     // suck four cubes R2-5 to R3-5
 
+    moveForward(30, 2.5, 500, 0.91, true);
+    task::sleep(250);
+
+    intakeStop();
+    task::sleep(250);
+
+    //turnRight(90);
+    //task::sleep(250);
+
+    //moveForward(40, 0.10, 500, 0.91, false);
+    //task::sleep(250);
+
+    turnRight(190);
+    task::sleep(250);
+
+    moveForward(40, 2.25, 500, 0.91, true);
+    task::sleep(250);
+
+    turnLeft(75);
+    task::sleep(250);
+
+    moveForward(40, 0.75, 500, 0.91, true);
+    task::sleep(250);
+
+    angler.rotateTo(-220, rotationUnits::deg, 25, velocityUnits::pct);
+    angler.stop(brakeType::hold);
+    task::sleep(250);
+    
+    barAuto(30, 20);
+
+    moveForward(10, 0.75, 500, 0.91, false);
+    task::sleep(250);
+
+    intakeOut(1000, 30);
+    intakeStop();
+    task::sleep(150);
+
+
+    moveForward(10, -1, 500, 0.91, true);
+
     // Score
+
   }
 
   // Route 2 - 6 Points
@@ -582,11 +654,11 @@ void usercontrol() {
 
     if (con.ButtonR1.pressing()) 
     {
-      angler.spin(vex::directionType::fwd, 20, vex::velocityUnits::pct);
+      angler.spin(vex::directionType::rev, 20, vex::velocityUnits::pct);
     } 
     if (con.ButtonR2.pressing()) 
     {
-      angler.spin(directionType::rev, 20, velocityUnits::pct);
+      angler.spin(directionType::fwd, 20, velocityUnits::pct);
     } 
     if (!(con.ButtonR1.pressing()) && !(con.ButtonR2.pressing()))
     {
@@ -605,11 +677,11 @@ void usercontrol() {
 
     if (con.ButtonUp.pressing()) 
     {
-    bar.spin(directionType::rev, 50, velocityUnits::pct);
+    bar.spin(directionType::fwd, 50, velocityUnits::pct);
     } 
     if (con.ButtonDown.pressing()) 
     {
-    bar.spin(directionType::fwd, 50, velocityUnits::pct);
+    bar.spin(directionType::rev, 50, velocityUnits::pct);
     } 
     if (!(con.ButtonUp.pressing()) && !(con.ButtonDown.pressing()))
     {
