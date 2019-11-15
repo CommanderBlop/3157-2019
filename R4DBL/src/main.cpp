@@ -30,7 +30,7 @@ int main() {
   pre_auton();
 
   Competition.autonomous(autonomous);
-  // Competition.drivercontrol(usercontrol);
+  Competition.drivercontrol(userControl);
     while(1) {
 
         // BackL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
