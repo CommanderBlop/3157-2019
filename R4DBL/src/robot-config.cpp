@@ -9,8 +9,19 @@ brain  Brain;
 
 // VEXcode device constructors
 
-// VEXcode generated functions
+motor      BackR(PORT1, gearSetting::ratio18_1, true);
+motor      FrontR(PORT2, gearSetting::ratio18_1, true);
+motor      BackL(PORT3, gearSetting::ratio18_1, false);
+motor      FrontL(PORT4, gearSetting::ratio18_1, false);
+motor      intakeL(PORT9, gearSetting::ratio18_1, false);
+motor      intakeR(PORT8, gearSetting::ratio18_1, false);
+motor      armL(PORT5, gearSetting::ratio6_1, true);
+motor      armR(PORT6, gearSetting::ratio6_1, true);
 
+controller con(controllerType::primary);
+
+
+// VEXcode generated functions
 
 
 /**

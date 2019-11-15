@@ -18,6 +18,12 @@
 
 #include "robot-config.h"
 
+#include "driveTrain.h"
+#include "screen.h"
+#include "autonomous.h"
+#include "controller.h"
+#include "intake.h"
+
 #define waitUntil(condition)                                                   \
   do {                                                                         \
     wait(5, msec);                                                             \

@@ -7,59 +7,60 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 #include "vex.h"
+//https://github.com/Kohmei358/RBE1001-Group1/blob/master/final.cpp
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
+// Drivetrain           drivetrain    3, 1            
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 using namespace vex;
 
-vex::motor      BackR(vex::PORT1, vex::gearSetting::ratio18_1, true);
-vex::motor      FrontR(vex::PORT2, vex::gearSetting::ratio18_1, true);
-vex::motor      BackL(vex::PORT3, vex::gearSetting::ratio18_1, false);
-vex::motor      FrontL(vex::PORT4, vex::gearSetting::ratio18_1, false);
-vex::motor      intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
-vex::motor      intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
-vex::motor      armL(vex::PORT5, vex::gearSetting::ratio6_1, true);
-vex::motor      armR(vex::PORT6, vex::gearSetting::ratio6_1, true);
+vex::competition Competition;
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 
-vex::controller con(vex::controllerType::primary);
+
 // define your global instances of motors and other devices here
 
-double mode;
+
  
 int main() {
-    while(1) {
-        BackL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
-        BackR.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
-        FrontR.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
-        FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
-        
-        if(con.ButtonL1.pressing()) {
-          intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-          intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-          mode = 1;
-        } else if(con.ButtonL2.pressing()) {
-          intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-          intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-          mode = 2;
-        } else {
-          intakeL.stop(brakeType::hold);
-          intakeR.stop(brakeType::hold);
-        }
+  pre_auton();
 
-        if(con.ButtonR1.pressing()) {
-          armL.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
-          armR.spin(vex::directionType::rev, 100, vex::velocityUnits::pct);
-        } else if(con.ButtonR2.pressing()) {
-          armL.spin(vex::directionType::rev, 100, vex::velocityUnits::pct);
-          armR.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
-        } else {
-          armR.stop(brakeType::hold);
-          armR.stop(brakeType::hold);
-        }
+  Competition.autonomous(autonomous);
+  // Competition.drivercontrol(usercontrol);
+    while(1) {
+
+        // BackL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
+        // BackR.spin(vex::directionType::fwd, con.Axis1.position(pct), vex::velocityUnits::pct);
+        // FrontR.spin(vex::directionType::fwd, con.Axis1.position(pct), vex::velocityUnits::pct);
+        // FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
+        
+        // if(con.ButtonL1.pressing() && mode <= 1) {
+        //   mode++;
+        // } else if(con.ButtonL2.pressing() && mode >= -1) {
+        //   mode--;
+        // }
+
+        // if(mode == 1) {
+        //   intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
+        //   intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
+        // } else if(mode == -1) {
+        //   intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
+        //   intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
+        // } else if(mode == 0) {
+        //   intakeL.stop(brakeType::hold);
+        //   intakeR.stop(brakeType::hold);
+        // }
+
+        // if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
+        //   armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+        //   armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+        // } else {
+        //   armL.stop(brakeType::hold);
+        //   armR.stop(brakeType::hold);
+        // }
       }
 }
