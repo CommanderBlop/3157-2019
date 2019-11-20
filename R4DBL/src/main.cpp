@@ -27,34 +27,13 @@ vex::competition Competition;
 
  
 int main() {
+  //pre_auton();
+  //btnL1();
+  //Competition.autonomous(autonomous);
+  //joyStick();
+  //Competition.drivercontrol(userControl);
   pre_auton();
-
-  Competition.autonomous(autonomous);
-  Competition.drivercontrol(userControl);
     while(1) {
-
-        // BackL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
-        // BackR.spin(vex::directionType::fwd, con.Axis1.position(pct), vex::velocityUnits::pct);
-        // FrontR.spin(vex::directionType::fwd, con.Axis1.position(pct), vex::velocityUnits::pct);
-        // FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct), vex::velocityUnits::pct);
-        
-        // if(con.ButtonL1.pressing() && mode <= 1) {
-        //   mode++;
-        // } else if(con.ButtonL2.pressing() && mode >= -1) {
-        //   mode--;
-        // }
-
-        // if(mode == 1) {
-        //   intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-        //   intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-        // } else if(mode == -1) {
-        //   intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-        //   intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-        // } else if(mode == 0) {
-        //   intakeL.stop(brakeType::hold);
-        //   intakeR.stop(brakeType::hold);
-        // }
-
         // if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
         //   armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
         //   armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);

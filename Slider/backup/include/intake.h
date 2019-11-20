@@ -1,7 +1,7 @@
 class Intake{
     private:
         Intake();
-        int position = 0;
+        int position = 0; //which level is the lift on currernly?
     public:
         static Intake* getInstance(); //singleton again
         void nextPos(); //change state

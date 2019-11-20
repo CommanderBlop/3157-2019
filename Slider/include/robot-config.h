@@ -1,6 +1,7 @@
 using namespace vex;
 
-//declare motors
+extern brain Brain;
+
 extern brain Brain;
 extern motor BackL;
 extern motor BackR;
@@ -8,15 +9,10 @@ extern motor FrontL;
 extern motor FrontR;
 extern motor intakeL;
 extern motor intakeR;
-extern motor armL;
-extern motor armR;
+extern motor angler;
+extern motor bar;
+
 extern controller con;
-
-//decalre global variable
-extern int mode;
-
-
-
 
 // VEXcode devices
 

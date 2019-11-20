@@ -39,11 +39,9 @@ void joyStick() {
 void arm() {
 while(true) {
   if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-        armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-        armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+        bar.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
   } else {
-        armL.stop(brakeType::hold);
-        armR.stop(brakeType::hold);
+        bar.stop(brakeType::hold);
   }
   vex::task::sleep(50);
   this_thread::yield();
