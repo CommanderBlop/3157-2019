@@ -13,11 +13,10 @@
 #include "vex.h"             
 
 using namespace vex;
-competition Competition1;
+competition Competition;
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 
-int mode = 0;
 
 // Main
 

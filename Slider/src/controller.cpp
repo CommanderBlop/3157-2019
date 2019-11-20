@@ -57,8 +57,38 @@ void startThreads(){
 }
 
 void userControl(void) {
-  startThreads();
-  while(1) {vex::this_thread::sleep_for(25);}
+  //startThreads();
+  bool lastMovedFwd = false;
+  while(1) {
+    double y = con.Axis3.position(pct);
+    double x = con.Axis1.position(pct) *  0.73;
+
+    if (fmax(x, x * -1) > 3) {
+      lastMovedFwd = false;
+    } else if (fmax(y, y * -1) > 3) {
+      lastMovedFwd = true;
+    }
+    if (fmax(y, y * -1) < 3 && fmax(x, x * -1) < 3) { // no input
+      if (lastMovedFwd == false) {
+        BackR.stop(brakeType::hold);
+        BackL.stop(brakeType::hold);
+        FrontR.stop(brakeType::hold);
+        FrontL.stop(brakeType::hold);
+      } else {
+        BackR.stop(brakeType::brake);
+        BackL.stop(brakeType::brake);
+        FrontR.stop(brakeType::brake);
+        FrontL.stop(brakeType::brake);
+      }
+    } else {
+      BackR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
+      FrontR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
+      BackL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
+      FrontL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
+    }
+    task::sleep(30);
+    vex::this_thread::sleep_for(25);
+  }
   // BackL.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 + con.Axis1.position(pct), vex::velocityUnits::pct);
   // BackR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
   // FrontR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
