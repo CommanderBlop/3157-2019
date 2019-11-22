@@ -101,6 +101,8 @@ void SetUpScreen::waitForInput(int Screen) {
       Brain.Screen.setCursor(3, 0);
       Brain.Screen.print("usercontrol");
       Brain.Screen.render();
+      
+      vex::thread t = thread(displayFinalScreen);
       userControl();
     } else if(x > 160 && x < 320 && y > 148 && y < 240) { //auton Run
       if(autonMode != AutonMode::NONE) {
@@ -154,8 +156,8 @@ void SetUpScreen::selectAuton(int x, int y) {
  int displayFinalScreen() {
   while(true) {
     Brain.Screen.clearScreen(ClrPink);
-    Brain.Screen.setFont(fontType::cjk16);
-    Brain.Screen.setCursor(3,5);
+    Brain.Screen.setFont(fontType::mono60);
+    Brain.Screen.setCursor(3,6);
     Brain.Screen.setPenColor(white);
     Brain.Screen.setFillColor(ClrPink);
     Brain.Screen.print("UwU");
@@ -164,7 +166,7 @@ void SetUpScreen::selectAuton(int x, int y) {
     Brain.Screen.setPenColor(ClrMistyRose);
     Brain.Screen.clearScreen(white);
     Brain.Screen.setFont(fontType::mono60);
-    Brain.Screen.setCursor(3,5);
+    Brain.Screen.setCursor(3,6);
     Brain.Screen.setFillColor(white);
     Brain.Screen.print("OwO");
     Brain.Screen.render();

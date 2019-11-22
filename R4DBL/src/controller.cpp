@@ -20,34 +20,54 @@ void btnL2() {
           Intake::getInstance()->prevPos();
           con.rumble("*-*-*");
       }
-      //this_thread::yield();
-      vex::task::sleep(50);
+      this_thread::yield();
   }
 }
 
 void joyStick() {
+  bool lastMovedFwd = false;
   while (true) {
-      BackL.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 + con.Axis1.position(pct), vex::velocityUnits::pct);
-      BackR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
-      FrontR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
-      FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 + con.Axis1.position(pct), vex::velocityUnits::pct);
-      vex::task::sleep(50);
-      //this_thread::yield();
+    double y = con.Axis3.position(pct);
+    double x = con.Axis1.position(pct);
+
+    if (fmax(x, x * -1) > 3 || fmax(y, y * -1) > 3) {
+      lastMovedFwd = false;
+    } else {
+      lastMovedFwd = true;
+    }
+    if (fmax(y, y * -1) < 3 && fmax(x, x * -1) < 3) {
+      if (lastMovedFwd == false) {
+        BackR.stop(brakeType::hold);
+        BackL.stop(brakeType::hold);
+        FrontR.stop(brakeType::hold);
+        FrontL.stop(brakeType::hold);
+      } else {
+        BackR.stop(brakeType::brake);
+        BackL.stop(brakeType::brake);
+        FrontR.stop(brakeType::brake);
+        FrontL.stop(brakeType::brake);
+      }
+    } else {
+      BackL.spin(vex::directionType::fwd, y + x  * 0.75, vex::velocityUnits::pct);
+      BackR.spin(vex::directionType::fwd, y - x  * 0.75, vex::velocityUnits::pct);
+      FrontR.spin(vex::directionType::fwd, y - x  * 0.75, vex::velocityUnits::pct);
+      FrontL.spin(vex::directionType::fwd, y + x * 0.75 , vex::velocityUnits::pct);
+      this_thread::yield();
+    }
   }
 }
 
 void arm() {
-while(true) {
-  if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-        armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-        armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-  } else {
-        armL.stop(brakeType::hold);
-        armR.stop(brakeType::hold);
+  while(true) {
+    if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
+          armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+          armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+    } else {
+          armL.stop(brakeType::hold);
+          armR.stop(brakeType::hold);
+    }
+    this_thread::yield();
   }
-  vex::task::sleep(50);
-  this_thread::yield();
-}
 }
 
 
