@@ -20,12 +20,12 @@ void btnL2() {
             lastPressed = false;
             Intake::getInstance() -> prevPos();
         }
-        this_thread::yield();
+        this_thread::yield(); 
     }
 }
 
-void R() {
-  //int startPos = angler.position(rotationUnits::deg) * -1;
+void slide() {
+  int startPos = angler.position(rotationUnits::deg) * -1;
   while(true) {
     if(con.ButtonR1.pressing()) {
       angler.spin(directionType::rev, 25, velocityUnits::pct);
@@ -68,36 +68,49 @@ void joyStick() {
       BackL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
       FrontL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
     }
-    this_thread::yield();
-  }
-}
 
-void arm() {
-  while(true) {
     if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-          bar.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
+          Arm::getInstance() -> move();
     } else {
           bar.stop(brakeType::hold);
     }
-    vex::task::sleep(50);
+
     this_thread::yield();
   }
 }
 
-void printing() {
-  Brain.Screen.clearScreen();
-  Brain.Screen.print(Intake::getInstance() -> position);
-  Brain.Screen.render();
+void btnUp() {
+  static bool lastPressed = con.ButtonUp.pressing();
+    while (true) {
+        if (con.ButtonUp.pressing()) lastPressed = true;
+        else if (!con.ButtonUp.pressing() && lastPressed) {
+            lastPressed = false;
+            Arm::getInstance() -> highTower();
+        }
+        this_thread::yield(); 
+    }
+}
+
+void btnRt() {
+  static bool lastPressed = con.ButtonRight.pressing();
+    while (true) {
+        if (con.ButtonRight.pressing()) lastPressed = true;
+        else if (!con.ButtonRight.pressing() && lastPressed) {
+            lastPressed = false;
+            Arm::getInstance() -> lowTower();
+        }
+        this_thread::yield(); 
+    }
 }
 
 
-void startThreads(){
+void startThreads() {
   vex::thread L1 = thread(btnL1);
   vex::thread L2 = thread(btnL2);
   vex::thread joy = thread(joyStick);
-  vex::thread lift = thread(arm);
-  vex::thread R1 = thread(R);
-  vex::thread scr = thread(printing);
+  vex::thread Up = thread(btnUp);
+  vex::thread Rt = thread(btnRt);
+  vex::thread slider = thread(slide);
 }
 
 

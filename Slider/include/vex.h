@@ -22,6 +22,7 @@
 #include "autonomous.h"
 #include "controller.h"
 #include "intake.h"
+#include "arm.h"
 
 #define waitUntil(condition)                                                   \
   do {                                                                         \

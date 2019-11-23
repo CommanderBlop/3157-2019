@@ -151,7 +151,7 @@ void SetUpScreen::selectAuton(int x, int y) {
   }
 }
 
- int displayFinalScreen() {
+int displayFinalScreen() {
   while(true) {
     Brain.Screen.clearScreen(ClrPink);
     Brain.Screen.setFont(fontType::cjk16);
@@ -175,28 +175,29 @@ void SetUpScreen::selectAuton(int x, int y) {
 
 void autonomous(void) {
   if(autonMode != NONE) {
-          switch(autonMode) {
-            case RedFront:
-              autonRedFront();
-              break;
-            case RedBack:
-              autonRedBack();
-              break;
-            case BlueFront:
-              autonBlueFront();
-              break;
-            case BlueBack:
-              autonBlueBack();
-              break;
-            default:
-              Brain.Screen.clearScreen();
-              Brain.Screen.setFont(fontType::mono40);
-              Brain.Screen.print("Something is wrong.\nNo Auton");
-          }
+    switch(autonMode) {
+      case RedFront:
+        autonRedFront();
+        break;
+      case RedBack:
+        autonRedBack();
+        break;
+      case BlueFront:
+        autonBlueFront();
+        break;
+      case BlueBack:
+        autonBlueBack();
+        break;
+      default:
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFont(fontType::mono40);
+        Brain.Screen.print("Something is wrong.\nNo Auton");
+    }
   }
 }
 
 void pre_auton() {
+  Arm::getInstance() -> calcValue();
   SetUpScreen setUp = SetUpScreen();
   setUp.displayMain();
 }
