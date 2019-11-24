@@ -9,16 +9,21 @@ using code = vision::code;
 // VEXcode device constructors
 
 // VEXcode generated functions
+
+// define your global instances of motors and other devices here
 vex::brain Brain;
 vex::controller con(vex::controllerType::primary);
-// define your global instances of motors and other devices here
+
 vex::motor BackR(vex::PORT2, vex::gearSetting::ratio18_1, true);
 vex::motor FrontR(vex::PORT12, vex::gearSetting::ratio18_1, true);
 vex::motor BackL(vex::PORT10, vex::gearSetting::ratio18_1, false);
 vex::motor FrontL(vex::PORT19, vex::gearSetting::ratio18_1, false);
+
 vex::motor intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
 vex::motor intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
+
 vex::motor angler(vex::PORT15, vex::gearSetting::ratio36_1, true);
+
 vex::motor bar(vex::PORT4, vex::gearSetting::ratio36_1, false);
 
 

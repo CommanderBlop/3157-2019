@@ -45,8 +45,9 @@ void SetUpScreen::displayMain() {
       Brain.Screen.setFillColor(blue);
   }
   Brain.Screen.setFillColor(blue);
+  Brain.Screen.setFont(fontType::prop40);
+  Brain.Screen.printAt(30, 117, "Cute");
   Brain.Screen.setFont(fontType::mono30);
-  Brain.Screen.printAt(15, 112, "VOID");
   Brain.Screen.printAt(193, 98, "Select");
   Brain.Screen.printAt(201, 128, "Auton");
   Brain.Screen.printAt(357, 112, "Skills");
@@ -126,10 +127,26 @@ void SetUpScreen::waitForInput(int Screen) {
         Brain.Screen.setCursor(3, 0);
         Brain.Screen.print("Competition");
         Brain.Screen.render();
-        vex::thread t = thread(displayFinalScreen);
-        while(true) {vex::this_thread::sleep_for(25);}
+        // vex::thread t = thread(displayFinalScreen);
+        // while(true) {vex::this_thread::sleep_for(25);}
         // Competition1.autonomous(autonomous);
         // Competition1.drivercontrol(usercontrol);
+    } else if(x > 0 && x < 160 && y > 55 && y < 148) {
+      task::sleep(500);
+      bool lastPressed = Brain.Screen.pressing();
+      while(lastPressed) {}
+      while(!Brain.Screen.pressing()) {
+          Brain.Screen.clearScreen();
+          Brain.Screen.drawImageFromBuffer(uwu_map, 0, 0, sizeof(uwu_map));
+          task::sleep(500);
+          Brain.Screen.render();
+          Brain.Screen.drawImageFromBuffer(owo_map, 0, 0, sizeof(owo_map));
+          task::sleep(500);
+          Brain.Screen.render();
+          vex::this_thread::sleep_for(25);
+      }
+      task::sleep(500);
+      displayMain();
     } else {
       displayMain();
     }
@@ -151,24 +168,15 @@ void SetUpScreen::selectAuton(int x, int y) {
   }
 }
 
-int displayFinalScreen() {
+void displayFinalScreen() {
   while(true) {
-    Brain.Screen.clearScreen(ClrPink);
-    Brain.Screen.setFont(fontType::cjk16);
-    Brain.Screen.setCursor(3,5);
-    Brain.Screen.setPenColor(white);
-    Brain.Screen.setFillColor(ClrPink);
-    Brain.Screen.print("UwU");
+    Brain.Screen.clearScreen();
+    Brain.Screen.drawImageFromBuffer(uwu_map, 0, 0, sizeof(uwu_map));
     Brain.Screen.render();
-    task::sleep(2000);
-    Brain.Screen.setPenColor(ClrMistyRose);
-    Brain.Screen.clearScreen(white);
-    Brain.Screen.setFont(fontType::mono60);
-    Brain.Screen.setCursor(3,5);
-    Brain.Screen.setFillColor(white);
-    Brain.Screen.print("OwO");
+    task::sleep(500);
+    Brain.Screen.drawImageFromBuffer(owo_map, 0, 0, sizeof(owo_map));
     Brain.Screen.render();
-    task::sleep(2000);
+    task::sleep(500);
     vex::this_thread::sleep_for(25);
   }
 }

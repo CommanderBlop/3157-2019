@@ -111,6 +111,7 @@ void startThreads() {
   vex::thread Up = thread(btnUp);
   vex::thread Rt = thread(btnRt);
   vex::thread slider = thread(slide);
+  vex::thread t = thread(displayFinalScreen);
 }
 
 
