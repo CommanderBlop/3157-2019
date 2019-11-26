@@ -27,19 +27,14 @@ vex::competition Competition;
 
  
 int main() {
-  //pre_auton();
-  //btnL1();
-  //Competition.autonomous(autonomous);
-  //joyStick();
-  //Competition.drivercontrol(userControl);
+  armL.resetRotation();
+  armR.resetRotation();
+
+  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
+  while(!Brain.Screen.pressing()){}
+  task::sleep(250);
+
   pre_auton();
-    while(1) {
-        // if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-        //   armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-        //   armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-        // } else {
-        //   armL.stop(brakeType::hold);
-        //   armR.stop(brakeType::hold);
-        // }
-      }
+
+    while(1) {}
 }

@@ -35,6 +35,7 @@ void Intake::prevPos() {
   updateState();
 }
 
-int Intake::getPos() {
-  return position;
+void Intake::setPos(int pos) {
+  position = pos;
+  updateState();
 }

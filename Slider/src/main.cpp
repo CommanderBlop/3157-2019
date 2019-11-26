@@ -21,7 +21,8 @@ competition Competition;
 // Main
 
 int main() {
-
+  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
+  while(!Brain.Screen.pressing()){}
+  task::sleep(250);
   pre_auton();
-
 }

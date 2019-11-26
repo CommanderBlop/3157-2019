@@ -25,3 +25,7 @@ void Arm::lowTower() {
 void Arm::highTower() {
   bar.rotateTo(HIGH_TOWER, rotationUnits::deg, 50, velocityUnits::pct, false);
 }
+
+void Arm::toZero() {
+  bar.rotateTo(0, rotationUnits::deg, 50, velocityUnits::pct, false);
+}

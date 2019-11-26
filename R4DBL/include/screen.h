@@ -7,7 +7,7 @@ class SetUpScreen{
         void selectAuton(int x, int y);
 };
 
-int displayFinalScreen();
+void displayFinalScreen();
 
 void autonomous(void);
 

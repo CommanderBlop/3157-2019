@@ -15,10 +15,19 @@ void DriveTrain::setDrivePower(int power){
 }
 
 void DriveTrain::turnLeft(int deg){
-    BackL.rotateFor(-1*deg,vex::rotationUnits::deg,false);
-    FrontL.rotateFor(-1*deg, vex::rotationUnits::deg,false);
-    BackR.rotateFor(deg,vex::rotationUnits::deg,false);
-    FrontR.rotateFor(deg,vex::rotationUnits::deg,true);
+    int turn = deg * ROTATE_1_DEG;
+    BackL.rotateFor(-1*turn,vex::rotationUnits::deg,false);
+    FrontL.rotateFor(-1*turn, vex::rotationUnits::deg,false);
+    BackR.rotateFor(turn,vex::rotationUnits::deg,false);
+    FrontR.rotateFor(turn,vex::rotationUnits::deg,true);
+}
+
+void DriveTrain::turnRight(int deg){
+    int turn = deg * ROTATE_1_DEG;
+    BackL.rotateFor(turn,vex::rotationUnits::deg,false);
+    FrontL.rotateFor(turn, vex::rotationUnits::deg,false);
+    BackR.rotateFor(-1*turn,vex::rotationUnits::deg,false);
+    FrontR.rotateFor(-1*turn,vex::rotationUnits::deg,true);
 }
 
 void DriveTrain::stop(){

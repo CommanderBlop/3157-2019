@@ -8,5 +8,5 @@ class Intake{
         void nextPos(); //change state
         void prevPos(); //change state
         void updateState(); //move
-        int getPos();
+        void setPos(int);
 };

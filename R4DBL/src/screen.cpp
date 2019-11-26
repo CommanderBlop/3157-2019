@@ -1,5 +1,5 @@
 #include "vex.h"
-enum AutonMode{RedFront, RedBack, BlueFront, BlueBack, NONE};
+enum AutonMode{RedFront, RedBack, BlueFront, BlueBack, NONE}; //offer five mode of auton
 AutonMode autonMode;
 SetUpScreen::SetUpScreen() {
   autonMode = NONE;
@@ -46,7 +46,7 @@ void SetUpScreen::displayMain() {
   }
   Brain.Screen.setFillColor(blue);
   Brain.Screen.setFont(fontType::mono30);
-  Brain.Screen.printAt(15, 112, "VOID");
+  Brain.Screen.printAt(30, 112, "Cute");
   Brain.Screen.printAt(193, 98, "Select");
   Brain.Screen.printAt(201, 128, "Auton");
   Brain.Screen.printAt(357, 112, "Skills");
@@ -132,6 +132,15 @@ void SetUpScreen::waitForInput(int Screen) {
         while(true) {vex::this_thread::sleep_for(25);}
         // Competition1.autonomous(autonomous);
         // Competition1.drivercontrol(usercontrol);
+    } else if(x > 0 && x < 160 && y > 55 && y < 148) {
+      task::sleep(500);
+      bool lastPressed = Brain.Screen.pressing();
+      while(lastPressed) {}
+      vex::thread uwu = thread(displayFinalScreen);
+      while(!Brain.Screen.pressing()) {vex::this_thread::sleep_for(25);}
+      uwu.interrupt();
+      task::sleep(500);
+      displayMain();
     } else {
       displayMain();
     }
@@ -153,48 +162,39 @@ void SetUpScreen::selectAuton(int x, int y) {
   }
 }
 
- int displayFinalScreen() {
+ void displayFinalScreen() {
   while(true) {
-    Brain.Screen.clearScreen(ClrPink);
-    Brain.Screen.setFont(fontType::mono60);
-    Brain.Screen.setCursor(3,6);
-    Brain.Screen.setPenColor(white);
-    Brain.Screen.setFillColor(ClrPink);
-    Brain.Screen.print("UwU");
+    Brain.Screen.clearScreen();
+    Brain.Screen.drawImageFromBuffer(uwu_map, 0, 0, sizeof(uwu_map));
     Brain.Screen.render();
-    task::sleep(2000);
-    Brain.Screen.setPenColor(ClrMistyRose);
-    Brain.Screen.clearScreen(white);
-    Brain.Screen.setFont(fontType::mono60);
-    Brain.Screen.setCursor(3,6);
-    Brain.Screen.setFillColor(white);
-    Brain.Screen.print("OwO");
+    task::sleep(rand() % 200 + 100);
+    Brain.Screen.drawImageFromBuffer(owo_map, 0, 0, sizeof(owo_map));
     Brain.Screen.render();
-    task::sleep(2000);
+    task::sleep(rand() % 1000 + 500);
     vex::this_thread::sleep_for(25);
   }
 }
 
 void autonomous(void) {
   if(autonMode != NONE) {
-          switch(autonMode) {
-            case RedFront:
-              autonRedFront();
-              break;
-            case RedBack:
-              autonRedBack();
-              break;
-            case BlueFront:
-              autonBlueFront();
-              break;
-            case BlueBack:
-              autonBlueBack();
-              break;
-            default:
-              Brain.Screen.clearScreen();
-              Brain.Screen.setFont(fontType::mono40);
-              Brain.Screen.print("Something is wrong.\nNo Auton");
-          }
+    switch(autonMode) {
+      case RedFront:
+        autonRedFront();
+        break;
+      case RedBack:
+        autonRedBack();
+        break;
+      case BlueFront:
+        autonBlueFront();
+        break;
+      case BlueBack:
+        autonBlueBack();
+        break;
+      default:
+        Brain.Screen.clearScreen();
+        Brain.Screen.setFont(fontType::mono40);
+        Brain.Screen.print("Something is wrong.\nNo Auton");
+    }
   }
 }
 
