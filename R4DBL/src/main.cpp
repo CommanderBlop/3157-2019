@@ -9,15 +9,9 @@
 #include "vex.h"
 //https://github.com/Kohmei358/RBE1001-Group1/blob/master/final.cpp
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Drivetrain           drivetrain    3, 1            
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 using namespace vex;
 
-vex::competition Competition;
+
 
 // A global instance of vex::brain used for printing to the V5 brain screen
 
@@ -26,11 +20,11 @@ vex::competition Competition;
 
 
  
-int main() { //calibrate values 
+int main() { //calibrate values, and enter OS screen.
   armL.resetRotation();
   armR.resetRotation();
 
-  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
+  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map)); //this is anime
   while(!Brain.Screen.pressing()){}
   task::sleep(250);
 

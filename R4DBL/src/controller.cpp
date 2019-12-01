@@ -1,5 +1,6 @@
 #include "vex.h"
 
+//Button L1 - arm next position
 void btnL1() {
   static bool lastPressed = con.ButtonL1.pressing();
   while (true) {
@@ -11,6 +12,7 @@ void btnL1() {
   }
 }
 
+//Button L2 - arm previous position
 void btnL2() {
   static bool lastPressed = con.ButtonL2.pressing();
   while (true) {
@@ -24,6 +26,7 @@ void btnL2() {
   }
 }
 
+//Joystick - arcade drive
 void joyStick() {
   bool lastMovedFwd = false;
   while (true) {
@@ -65,18 +68,21 @@ void joyStick() {
   }
 }
 
+//auto arm correction
 void armCorrect() {
   while(true) {
-    int L = armL.rotation(rotationUnits::deg);
-    int R = armR.rotation(rotationUnits::deg);
-    if(L!= R) {
-      armR.rotateFor(fwd, L-R, rotationUnits::deg);
+    if(armL.isSpinning() && armR.isSpinning()) {
+      int L = armL.rotation(rotationUnits::deg);
+      int R = armR.rotation(rotationUnits::deg);
+      if(L!= R) {
+        armR.rotateFor(fwd, L-R, rotationUnits::deg);
+      }
     }
     this_thread::yield();
   }
 }
 
-
+//start threads
 void startThreads(){
   vex::thread L1 = thread(btnL1);
   vex::thread L2 = thread(btnL2);

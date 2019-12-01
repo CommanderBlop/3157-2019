@@ -11,6 +11,7 @@ extern motor intakeR;
 extern motor armL;
 extern motor armR;
 extern controller con;
+extern competition Competition;
 
 //decalre global variable
 extern int mode;

@@ -69,6 +69,7 @@ void SetUpScreen::displayMain() { //display main
 
 //parameter: screen state
 //0: home screen
+//1: auton selection
 void SetUpScreen::waitForInput(int Screen) {
   while(!Brain.Screen.pressing()){} //wait for the screen to be pressed
   task::sleep(250);
@@ -138,7 +139,7 @@ void SetUpScreen::waitForInput(int Screen) {
         Brain.Screen.render();
         Competition.autonomous(autonomous);
         Competition.drivercontrol(userControl);
-    } else if(x > 0 && x < 160 && y > 55 && y < 148) {//kawaiiiiiiiiiiiiii
+    } else if(x > 0 && x < 160 && y > 55 && y < 148) { //kawaiiiiiiiiiiiiii
       task::sleep(500);
       bool lastPressed = Brain.Screen.pressing();
       while(lastPressed) {}
