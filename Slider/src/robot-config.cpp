@@ -26,6 +26,8 @@ vex::motor angler(vex::PORT15, vex::gearSetting::ratio36_1, true);
 
 vex::motor bar(vex::PORT4, vex::gearSetting::ratio36_1, false);
 
+vex::competition Competition;
+
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

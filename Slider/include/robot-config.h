@@ -13,6 +13,7 @@ extern motor angler;
 extern motor bar;
 
 extern controller con;
+extern competition Competition;
 
 // VEXcode devices
 

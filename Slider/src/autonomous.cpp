@@ -45,8 +45,6 @@ void autonRedFront() {
   task::sleep(100);
   DriveTrain::getInstance() -> setDrivePower(-15);
   task::sleep(500);
-
-
 }
 
 /*

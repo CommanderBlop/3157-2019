@@ -1,5 +1,8 @@
 #include "vex.h"
 
+int ANGLER_LIMIT = -550; //the limit of the angler
+
+//intake stop and forward
 void btnL1() {
   static bool lastPressed = con.ButtonL1.pressing();
     while (true) {
@@ -12,6 +15,7 @@ void btnL1() {
     }
 }
 
+//intake stop and reverse
 void btnL2() {
   static bool lastPressed = con.ButtonL2.pressing();
     while (true) {
@@ -24,12 +28,13 @@ void btnL2() {
     }
 }
 
+//R1 - slider down
+//R2 - slider up
 void slide() {
-  int startPos = angler.position(rotationUnits::deg) * -1;
   while(true) {
-    if(con.ButtonR1.pressing()) {
+    if(con.ButtonR1.pressing() && angler.rotation(rotationUnits::deg) >= ANGLER_LIMIT) {
       angler.spin(directionType::rev, 25, velocityUnits::pct);
-    } else if(con.ButtonR2.pressing()) {
+    } else if(con.ButtonR2.pressing() && angler.rotation(rotationUnits::deg) <= 0) {
       angler.spin(directionType::fwd, 25, velocityUnits::pct);
     } else {
       angler.stop(brake);
@@ -38,6 +43,7 @@ void slide() {
   }
 }
 
+//arcade drive
 void joyStick() {
   bool lastMovedFwd = false;
   while (true) {
@@ -74,11 +80,11 @@ void joyStick() {
     } else {
           bar.stop(brakeType::hold);
     }
-
     this_thread::yield();
   }
 }
 
+//Button Up - reach for high tower
 void btnUp() {
   static bool lastPressed = con.ButtonUp.pressing();
     while (true) {
@@ -91,6 +97,7 @@ void btnUp() {
     }
 }
 
+//Button Down - reach for low tower
 void btnRt() {
   static bool lastPressed = con.ButtonRight.pressing();
     while (true) {
@@ -117,9 +124,8 @@ void startThreads() {
 
 
 void userControl(void) {
-  startThreads();
-  while(1) {
-    vex::this_thread::sleep_for(25);}
+  startThreads(); //start the threads for controller
+  while(1) {vex::this_thread::sleep_for(25);}
   // bool lastMovedFwd = false;
   // while(1) {
   //   double y = con.Axis3.position(pct);

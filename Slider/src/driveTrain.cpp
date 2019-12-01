@@ -1,20 +1,23 @@
 #include "vex.h"
 
-DriveTrain::DriveTrain(){}
+//**important** measure the rotation motor degree for each actual degree/
+//and log it in the header file
+
+DriveTrain::DriveTrain(){} 
 
 DriveTrain* DriveTrain::getInstance(){                                                                                
     static DriveTrain instance;
     return &instance; //returns a pointer to the single instance                                                            
 }       
 
-void DriveTrain::setDrivePower(int power){
+void DriveTrain::setDrivePower(int power){ //set drive power
     BackL.spin(directionType::fwd,power,velocityUnits::pct);
     BackR.spin(directionType::fwd,power,velocityUnits::pct);
     FrontL.spin(directionType::fwd,power,velocityUnits::pct);
     FrontR.spin(directionType::fwd,power,velocityUnits::pct);
 }
 
-void DriveTrain::turnLeft(int deg){
+void DriveTrain::turnLeft(int deg){ //turn left with an integer degree
     int turn = deg * ROTATE_1_DEG;
     BackL.rotateFor(-1*turn,vex::rotationUnits::deg,false);
     FrontL.rotateFor(-1*turn, vex::rotationUnits::deg,false);
@@ -22,7 +25,7 @@ void DriveTrain::turnLeft(int deg){
     FrontR.rotateFor(turn,vex::rotationUnits::deg,true);
 }
 
-void DriveTrain::turnRight(int deg){
+void DriveTrain::turnRight(int deg){//turn right with an integer degree
     int turn = deg * ROTATE_1_DEG;
     BackL.rotateFor(turn,vex::rotationUnits::deg,false);
     FrontL.rotateFor(turn, vex::rotationUnits::deg,false);
@@ -30,7 +33,7 @@ void DriveTrain::turnRight(int deg){
     FrontR.rotateFor(-1*turn,vex::rotationUnits::deg,true);
 }
 
-void DriveTrain::stop(){
+void DriveTrain::stop(){ //stop all motors
     FrontL.stop();
     FrontR.stop();
     BackL.stop();

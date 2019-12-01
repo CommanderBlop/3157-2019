@@ -26,7 +26,7 @@ vex::competition Competition;
 
 
  
-int main() {
+int main() { //calibrate values 
   armL.resetRotation();
   armR.resetRotation();
 
@@ -36,5 +36,5 @@ int main() {
 
   pre_auton();
 
-    while(1) {}
+  while(1) {}
 }
