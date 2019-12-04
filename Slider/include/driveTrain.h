@@ -8,4 +8,5 @@ class DriveTrain{
         void turnLeft(int deg);
         void turnRight(int deg);
         void stop(); //stop breakType is break
+        void moveForward(int deg, int power);
 };

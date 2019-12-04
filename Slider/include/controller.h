@@ -2,11 +2,15 @@ void btnL1();
 
 void btnL2();
 
+void btnR1();
+
+void btnR2();
+
 void btnUp();
 
-void btnRt();
+void btnDown();
 
-void slide();
+//void slide();
 
 void joyStick();
 

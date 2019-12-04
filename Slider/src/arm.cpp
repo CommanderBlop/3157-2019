@@ -18,6 +18,16 @@ void Arm::move() { //move arm based on right joystick vertical axis
   bar.spin(vex::directionType::fwd, con.Axis2.position(pct) * ARM_SPEED_BUFFER, vex::velocityUnits::pct);
 }
 
+void Arm::moveUp() {
+  bar.spin(directionType::fwd, 50, vex::velocityUnits::pct);
+
+}
+
+void Arm::moveDown() {
+  bar.spin(directionType::rev, 50, vex::velocityUnits::pct);
+}
+
+
 void Arm::lowTower() { //raise/lower arm to reach low tower height
   bar.rotateTo(LOW_TOWER, rotationUnits::deg, 50, velocityUnits::pct, false);
 }

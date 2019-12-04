@@ -2,7 +2,37 @@
 
 int ANGLER_LIMIT = -550; //the limit of the angler
 
-//intake stop and forward
+//arm up
+void btnR1() {
+  static bool lastPressed = con.ButtonR1.pressing();
+    while (true) {
+        if (con.ButtonR1.pressing()) lastPressed = true;
+        else if (!con.ButtonR1.pressing() && lastPressed) {
+            lastPressed = false;
+            Arm::getInstance() -> moveUp();
+        } else if(!con.ButtonR1.pressing() && !con.ButtonR2.pressing()) {
+            bar.stop();
+        }
+        this_thread::yield();
+    }
+}
+
+//arm down
+void btnR2() {
+  static bool lastPressed = con.ButtonR2.pressing();
+    while (true) {
+        if (con.ButtonR2.pressing()) lastPressed = true;
+        else if (!con.ButtonR2.pressing() && lastPressed) {
+            lastPressed = false;
+            Arm::getInstance() -> moveDown();
+        } else if(!con.ButtonR2.pressing() && !con.ButtonR1.pressing()) {
+            bar.stop();
+        }
+        this_thread::yield(); 
+    }
+}
+
+//Intake in
 void btnL1() {
   static bool lastPressed = con.ButtonL1.pressing();
     while (true) {
@@ -15,7 +45,7 @@ void btnL1() {
     }
 }
 
-//intake stop and reverse
+//intake out
 void btnL2() {
   static bool lastPressed = con.ButtonL2.pressing();
     while (true) {
@@ -30,7 +60,7 @@ void btnL2() {
 
 //R1 - slider down
 //R2 - slider up
-void slide() {
+/*void slide() {
   while(true) {
     if(con.ButtonR1.pressing() && angler.rotation(rotationUnits::deg) >= ANGLER_LIMIT) {
       angler.spin(directionType::rev, 25, velocityUnits::pct);
@@ -41,9 +71,9 @@ void slide() {
     }
     this_thread::yield();
   }
-}
+}*/
 
-//arcade drive
+//arcade drive w arm up and down
 void joyStick() {
   bool lastMovedFwd = false;
   while (true) {
@@ -76,15 +106,16 @@ void joyStick() {
     }
 
     if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-          Arm::getInstance() -> move();
+          angler.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
     } else {
-          bar.stop(brakeType::hold);
+          angler.stop(brakeType::hold);
     }
+
     this_thread::yield();
   }
 }
 
-//Button Up - reach for high tower
+//Button Up - reach for mid tower 
 void btnUp() {
   static bool lastPressed = con.ButtonUp.pressing();
     while (true) {
@@ -98,11 +129,11 @@ void btnUp() {
 }
 
 //Button Down - reach for low tower
-void btnRt() {
+void btnDown() {
   static bool lastPressed = con.ButtonRight.pressing();
     while (true) {
-        if (con.ButtonRight.pressing()) lastPressed = true;
-        else if (!con.ButtonRight.pressing() && lastPressed) {
+        if (con.ButtonDown.pressing()) lastPressed = true;
+        else if (!con.ButtonDown.pressing() && lastPressed) {
             lastPressed = false;
             Arm::getInstance() -> lowTower();
         }
@@ -114,10 +145,12 @@ void btnRt() {
 void startThreads() {
   vex::thread L1 = thread(btnL1);
   vex::thread L2 = thread(btnL2);
+  vex::thread R1 = thread(btnR1);
+  vex::thread R2 = thread(btnR2);
   vex::thread joy = thread(joyStick);
   vex::thread Up = thread(btnUp);
-  vex::thread Rt = thread(btnRt);
-  vex::thread slider = thread(slide);
+  vex::thread Down = thread(btnDown);
+  //vex::thread slider = thread(slide);
   vex::thread t = thread(displayFinalScreen);
 }
 

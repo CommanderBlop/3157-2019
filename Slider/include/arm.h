@@ -11,4 +11,6 @@ class Arm {
     void highTower();
     void calcValue();
     void toZero();
+    void moveUp();
+    void moveDown();
 };
