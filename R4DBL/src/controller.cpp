@@ -6,7 +6,7 @@ void btnL1() {
   while (true) {
       if (con.ButtonL1.pressing()) lastPressed = true;
       else if (!con.ButtonL1.pressing() && lastPressed) {
-          Intake::getInstance() -> nextPos();
+          Hugger::getInstance() -> nextPos();
       }
       this_thread::yield();
   }
@@ -19,7 +19,7 @@ void btnL2() {
       if (con.ButtonR2.pressing()) lastPressed = true;
       else if (!con.ButtonR2.pressing() && lastPressed) {
           lastPressed = false;
-          Intake::getInstance()->prevPos();
+          Hugger::getInstance()->prevPos();
           con.rumble("*-*-*");
       }
       this_thread::yield();

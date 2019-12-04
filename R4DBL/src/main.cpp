@@ -23,6 +23,7 @@ using namespace vex;
 int main() { //calibrate values, and enter OS screen.
   armL.resetRotation();
   armR.resetRotation();
+  Hug.resetRotation();
 
   Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map)); //this is anime
   while(!Brain.Screen.pressing()){}
