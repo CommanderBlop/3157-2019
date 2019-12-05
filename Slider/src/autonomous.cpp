@@ -1,4 +1,16 @@
 #include "vex.h"
+
+void stack() {
+  DriveTrain::getInstance()->setDrivePower(12);
+  angler.rotateTo(645, rotationUnits::deg, 45, velocityUnits::pct, true);
+  DriveTrain::getInstance()->setDrivePower(15);
+  task::sleep(250);
+  //DriveTrain::getInstance()->stop();
+  
+  DriveTrain::getInstance()->setDrivePower(-25);
+  task::sleep(500);
+  //angler.rotateTo(0, rotationUnits::deg, 45, velocityUnits::pct, false);
+}
 /*
   	Start between R1-2, expand, suck preload, suck R2-2, suck 2 of the R3-2 stack, turn around R1-1, score.
     6 pts.
@@ -9,10 +21,36 @@ void autonRedFront() {
   bar.rotateTo(200, rotationUnits::deg, false);
   //Intake::getInstance() -> setPos(-1);
   Intake::getInstance() -> setPos(1);
-  task::sleep(300);
   bar.rotateTo(0, rotationUnits::deg, false);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*2, 50);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.6, 50);
+
+  DriveTrain::getInstance() -> turnRight(40, 35);
+
+  DriveTrain::getInstance() -> moveForward(-1.6 * ONE_TILE, 75);
+  
   task::sleep(200);
+
+  DriveTrain::getInstance() -> turnLeft(30, 35);
+  task::sleep(200);
+
+  DriveTrain::getInstance() -> moveForward(0.9 * ONE_TILE, 50);
+
+  Intake::getInstance()->setPos(0);
+
+  // DriveTrain::getInstance() -> turnRight(135, 35);
+
+  // DriveTrain::getInstance() -> moveForward(3.5*ONE_TILE, 55);
+
+
+
+  // DriveTrain::getInstance()-> setDrivePower(15);
+  // task::sleep(50);
+
+
+  // stack();
+
+
+
     
   //storing preload
   

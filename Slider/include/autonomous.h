@@ -1,4 +1,4 @@
-
+void stack();
 
 void autonRedFront();
 
