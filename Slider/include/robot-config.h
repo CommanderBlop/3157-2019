@@ -14,6 +14,7 @@ extern motor bar;
 
 extern controller con;
 extern competition Competition;
+extern double ONE_TILE;
 
 // VEXcode devices
 
