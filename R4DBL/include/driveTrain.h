@@ -2,6 +2,7 @@ class DriveTrain{
     private:
         DriveTrain(); //Singleton setup
         int ROTATE_1_DEG;
+        int ROTATE_360_DEG;
     public:
         static DriveTrain* getInstance();
         void setDrivePower(int power); //power in %
