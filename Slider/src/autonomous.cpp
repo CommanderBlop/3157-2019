@@ -4,12 +4,12 @@
     6 pts.
   */
 void autonRedFront() {
-  // //expand while moving forward
-  // Arm::getInstance() -> lowTower();
-  // Intake::getInstance() -> setPos(-1);
-  // task::sleep(300);
-  // DriveTrain::getInstance() -> setDrivePower(50);
-  // task::sleep(200);
+  //expand while moving forward
+  Arm::getInstance() -> lowTower();
+  Intake::getInstance() -> setPos(-1);
+  task::sleep(300);
+  DriveTrain::getInstance() -> setDrivePower(50);
+  task::sleep(200);
     
   // //storing preload
   // Arm::getInstance() -> toZero();
