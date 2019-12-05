@@ -26,6 +26,7 @@ vex::motor angler(vex::PORT15, vex::gearSetting::ratio36_1, true);
 vex::motor bar(vex::PORT5, vex::gearSetting::ratio36_1, false);
 
 competition Competition;
+double ONE_TILE = 2000/3;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

@@ -9,4 +9,5 @@ class DriveTrain{
         void turnRight(int deg);
         void stop(); //stop breakType is break
         void moveForward(int deg, int power);
+        void moveBackward(int deg, int power);
 };

@@ -94,3 +94,33 @@ void DriveTrain::moveForward(int degree, int power) {
 
   DriveTrain::getInstance() -> stop();
 }
+
+void DriveTrain::moveBackward(int degree, int power) {
+  Brain.resetTimer();
+  BackL.resetRotation();
+  BackR.resetRotation();
+  FrontL.resetRotation();
+  FrontR.resetRotation();
+  for(int i = 0; i < 20; i++) {
+    BackL.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    BackR.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    FrontR.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    FrontL.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    task::sleep(10);
+  }
+  int angleMove = degree - 2 * BackL.rotation(rotationUnits::deg);
+  BackL.rotateFor(angleMove,vex::rotationUnits::deg,false);
+  FrontL.rotateFor(angleMove, vex::rotationUnits::deg,false);
+  BackR.rotateFor(angleMove,vex::rotationUnits::deg,false);
+  FrontR.rotateFor(angleMove,vex::rotationUnits::deg,true);
+
+  for(int i = 20; i > 0; i--) {
+    BackL.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    BackR.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    FrontR.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    FrontL.setVelocity(-1*(power * i / 20), velocityUnits::pct);
+    task::sleep(10);
+  }
+
+  DriveTrain::getInstance() -> stop();
+}
