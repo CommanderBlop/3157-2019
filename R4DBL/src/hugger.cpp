@@ -15,27 +15,38 @@ Hugger* Hugger::getInstance() {
 void Hugger::updateState() { //Hugger state change
   switch(position) {
     case 1: //Hugger
-      Hug.rotateFor(OPEN_STATE, rotationUnits::deg, 50, velocityUnits::pct, true);
+      Hug.rotateFor(-1* OPEN_STATE, rotationUnits::deg, 25, velocityUnits::pct, true);
       Hug.setBrake(brakeType::hold);
       break;
     case 0: //outtake
-      Hug.rotateFor(-1 * OPEN_STATE, rotationUnits::deg, 50, velocityUnits::pct, true);
-      Hug.setBrake(brakeType::hold);
+      Hug.rotateFor(OPEN_STATE, rotationUnits::deg, 25, velocityUnits::pct, true);
+      Hug.spin(directionType::fwd, 5, velocityUnits::pct);
+      while(Hug.torque(torqueUnits::Nm) < 0.8) {}
+      Hug.stop(brakeType::hold);
       break;
   }
 }
 
-void Hugger::nextPos() { //Hugger state +1
-  if(position == 0) {
-    position = 1; 
-    updateState();
+void Hugger::open() { //Hugger state +1
+  if(!atMax ) {
+    Hug.spin(directionType::rev, 25, velocityUnits::pct);
+    if(Hug.torque(torqueUnits::Nm) > 0.8) {
+      atMax = true;
+      Hug.stop(brakeType::hold);
+    }
   }
 }
 
-void Hugger::prevPos() { //Hugger state -1
-  if(position == 1) {
-    position = 0; 
-    updateState();
+void Hugger::close() { //Hugger state -1
+  Hug.spin(directionType::fwd, 25, velocityUnits::pct);
+  if(Hug.torque(torqueUnits::Nm) > 0.8) {
+    Hug.stop(brakeType::coast);
+  }
+  if(con.ButtonL2.pressing()) {
+    Hug.rotateFor(OPEN_STATE, rotationUnits::deg, 25, velocityUnits::pct, true);
+    Hug.spin(directionType::fwd, 5, velocityUnits::pct);
+    while(Hug.torque(torqueUnits::Nm) < 0.8) {}
+    Hug.stop(brakeType::hold);
   }
 }
 

@@ -19,12 +19,11 @@ void Arm::move() { //move arm based on right joystick vertical axis
 }
 
 void Arm::moveUp() {
-  bar.spin(directionType::fwd, 50, vex::velocityUnits::pct);
-
+  bar.spin(vex::directionType::fwd, 35, vex::velocityUnits::pct);
 }
 
 void Arm::moveDown() {
-  bar.spin(directionType::rev, 50, vex::velocityUnits::pct);
+  bar.spin(vex::directionType::fwd, -35, vex::velocityUnits::pct);
 }
 
 

@@ -21,15 +21,22 @@ using namespace vex;
 
  
 int main() { //calibrate values, and enter OS screen.
-  armL.resetRotation();
-  armR.resetRotation();
-  Hug.resetRotation();
+  // armL.resetRotation();
+  // armR.resetRotation();
+  // Hug.resetRotation();
+  // Hugger::getInstance()->prevPos();
+  // task::sleep(1000);
+  // Hugger::getInstance()->nextPos();
+  // Hug.spin(directionType::fwd, 20, velocityUnits::rpm);
+  // task::sleep(2000);
 
-  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map)); //this is anime
-  while(!Brain.Screen.pressing()){}
-  task::sleep(250);
 
-  pre_auton();
+  // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map)); //this is anime
+  // while(!Brain.Screen.pressing()){}
+  // task::sleep(250);
 
-  while(1) {}
+userControl();
+  // pre_auton();
+
+  // while(1) {}
 }

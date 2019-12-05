@@ -6,14 +6,16 @@ int ANGLER_LIMIT = -550; //the limit of the angler
 void btnR1() {
   static bool lastPressed = con.ButtonR1.pressing();
     while (true) {
-        if (con.ButtonR1.pressing()) lastPressed = true;
+        if (con.ButtonR1.pressing()) {
+          lastPressed = true;
+          Arm::getInstance() -> moveUp();
+        } 
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
-            Arm::getInstance() -> moveUp();
-        } else if(!con.ButtonR1.pressing() && !con.ButtonR2.pressing()) {
-            bar.stop();
+            bar.stop(brakeType::hold);
+            
         }
-        this_thread::yield();
+        this_thread::yield(); 
     }
 }
 
@@ -21,12 +23,14 @@ void btnR1() {
 void btnR2() {
   static bool lastPressed = con.ButtonR2.pressing();
     while (true) {
-        if (con.ButtonR2.pressing()) lastPressed = true;
+        if (con.ButtonR2.pressing()) {
+          lastPressed = true;
+          Arm::getInstance() -> moveDown();
+        } 
         else if (!con.ButtonR2.pressing() && lastPressed) {
             lastPressed = false;
-            Arm::getInstance() -> moveDown();
-        } else if(!con.ButtonR2.pressing() && !con.ButtonR1.pressing()) {
-            bar.stop();
+            bar.stop(brakeType::hold);
+            
         }
         this_thread::yield(); 
     }
@@ -36,10 +40,17 @@ void btnR2() {
 void btnL1() {
   static bool lastPressed = con.ButtonL1.pressing();
     while (true) {
-        if (con.ButtonL1.pressing()) lastPressed = true;
+        if (con.ButtonL1.pressing()) {
+          lastPressed = true;
+          intakeL.spin(directionType::fwd, 75, velocityUnits::pct);
+          intakeR.spin(directionType::rev, 75, velocityUnits::pct);
+        }
+
         else if (!con.ButtonL1.pressing() && lastPressed) {
             lastPressed = false;
-            Intake::getInstance() -> nextPos();
+            intakeL.stop(brakeType::brake);
+            intakeR.stop(brakeType::brake);
+            //Intake::getInstance() -> nextPos();
         }
         this_thread::yield();
     }
@@ -49,10 +60,16 @@ void btnL1() {
 void btnL2() {
   static bool lastPressed = con.ButtonL2.pressing();
     while (true) {
-        if (con.ButtonL2.pressing()) lastPressed = true;
+        if (con.ButtonL2.pressing()) {
+          lastPressed = true;
+          intakeL.spin(directionType::rev, 75, velocityUnits::pct);
+          intakeR.spin(directionType::fwd, 75, velocityUnits::pct);
+        }
         else if (!con.ButtonL2.pressing() && lastPressed) {
             lastPressed = false;
-            Intake::getInstance() -> prevPos();
+            intakeL.stop(brakeType::brake);
+            intakeR.stop(brakeType::brake);
+            //Intake::getInstance() -> prevPos();
         }
         this_thread::yield(); 
     }

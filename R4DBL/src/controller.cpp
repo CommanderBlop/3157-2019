@@ -1,12 +1,20 @@
 #include "vex.h"
-
+bool atMax = false;
+bool atMin = false;
+int minPos = 0;
 //Button L1 - arm next position
 void btnL1() {
   static bool lastPressed = con.ButtonL1.pressing();
   while (true) {
-      if (con.ButtonL1.pressing()) lastPressed = true;
+      if (con.ButtonL1.pressing()) {
+        lastPressed = true;
+        Hug.spin(directionType::rev, 25, velocityUnits::pct);
+        double dist = fmax((Hug.rotation(rotationUnits::deg) - minPos), -1*(Hug.rotation(rotationUnits::deg) - minPos));
+        if(atMin && dist > 20) atMin = false;
+      }
       else if (!con.ButtonL1.pressing() && lastPressed) {
-          Hugger::getInstance() -> nextPos();
+          lastPressed = false;
+          Hug.stop(brakeType::coast);
       }
       this_thread::yield();
   }
@@ -16,11 +24,22 @@ void btnL1() {
 void btnL2() {
   static bool lastPressed = con.ButtonL2.pressing();
   while (true) {
-      if (con.ButtonR2.pressing()) lastPressed = true;
-      else if (!con.ButtonR2.pressing() && lastPressed) {
+      if (con.ButtonL2.pressing()) {
+        if(Hug.torque(torqueUnits::Nm) < 0.8 && !atMin) {
+          Hug.spin(directionType::fwd, 25, velocityUnits::pct);
+        } else {
+          Hug.spin(directionType::fwd, 5, velocityUnits::pct);
+          while(Hug.torque(torqueUnits::Nm) < 0.8) {}
+          Hug.stop(brakeType::hold);
+          atMin = true;
+        }
+        lastPressed = true;
+      }
+      else if (!con.ButtonL2.pressing() && lastPressed) {
           lastPressed = false;
-          Hugger::getInstance()->prevPos();
-          con.rumble("*-*-*");
+          Hug.stop(brakeType::hold);
+          //Hugger::getInstance()->close();
+          //con.rumble("*-*-*");
       }
       this_thread::yield();
   }

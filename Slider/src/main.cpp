@@ -1,3 +1,5 @@
+
+
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -20,8 +22,9 @@ using namespace vex;
 // Main
 
 int main() {
-  Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
-  while(!Brain.Screen.pressing()){}
-  task::sleep(250);
+  // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
+  // while(!Brain.Screen.pressing()){}
+  // task::sleep(250);
   pre_auton();
+  //userControl();
 }
