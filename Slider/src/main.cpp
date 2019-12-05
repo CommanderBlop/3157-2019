@@ -27,7 +27,8 @@ int main() {
   //pre_auton();
   //DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
   //stack();
-  autonRedFront();
+  //autonRedFront();
+  autonRedBack();
   //userControl();
 }
 
