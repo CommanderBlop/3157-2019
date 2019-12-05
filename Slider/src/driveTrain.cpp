@@ -17,20 +17,45 @@ void DriveTrain::setDrivePower(int power){ //set drive power
     FrontR.spin(directionType::fwd,power,velocityUnits::pct);
 }
 
-void DriveTrain::turnLeft(int deg){ //turn left with an integer degree
-    int turn = deg * ROTATE_1_DEG;
-    BackL.rotateFor(-1*turn,vex::rotationUnits::deg,false);
-    FrontL.rotateFor(-1*turn, vex::rotationUnits::deg,false);
-    BackR.rotateFor(turn,vex::rotationUnits::deg,false);
-    FrontR.rotateFor(turn,vex::rotationUnits::deg,true);
+void DriveTrain::turnLeft(int deg, int power){ //turn left with an integer degree
+    double turn = deg * ROTATE_360_DEG/360;
+
+    Brain.resetTimer();
+  BackL.resetRotation();
+  BackR.resetRotation();
+  FrontL.resetRotation();
+  FrontR.resetRotation();
+  for(int i = 0; i < 100; i++) {
+    BackL.setVelocity(-1*power * i / 100, velocityUnits::pct);
+    BackR.setVelocity(power * i / 100, velocityUnits::pct);
+    FrontR.setVelocity(power * i / 100, velocityUnits::pct);
+    FrontL.setVelocity(-1*power * i / 100, velocityUnits::pct);
+    task::sleep(10);
+  }
+  int angleMove = turn - 2 * BackL.rotation(rotationUnits::deg);
+  BackL.rotateFor(-1*angleMove,vex::rotationUnits::deg,-1*power, velocityUnits::pct,false);
+  FrontL.rotateFor(-1*angleMove, vex::rotationUnits::deg,-1*power, velocityUnits::pct,false);
+  BackR.rotateFor(angleMove,vex::rotationUnits::deg,power, velocityUnits::pct,false);
+  FrontR.rotateFor(angleMove,vex::rotationUnits::deg,power, velocityUnits::pct,true);
+
+  for(int i = 100; i > 0; i--) {
+    BackL.setVelocity(-1*power * i / 100, velocityUnits::pct);
+    BackR.setVelocity(power * i / 100, velocityUnits::pct);
+    FrontR.setVelocity(power * i / 100, velocityUnits::pct);
+    FrontL.setVelocity(-1*power * i / 100, velocityUnits::pct);
+    task::sleep(10);
+  }
+
+    stop();
 }
 
 void DriveTrain::turnRight(int deg){//turn right with an integer degree
-    int turn = deg * ROTATE_1_DEG;
-    BackL.rotateFor(turn,vex::rotationUnits::deg,false);
-    FrontL.rotateFor(turn, vex::rotationUnits::deg,false);
-    BackR.rotateFor(-1*turn,vex::rotationUnits::deg,false);
-    FrontR.rotateFor(-1*turn,vex::rotationUnits::deg,true);
+    int turn = deg * ROTATE_360_DEG;
+    BackL.rotateFor(turn,vex::rotationUnits::deg, 35, velocityUnits::pct, false);
+    FrontL.rotateFor(turn, vex::rotationUnits::deg,35, velocityUnits::pct, false);
+    BackR.rotateFor(-1*turn,vex::rotationUnits::deg,35, velocityUnits::pct, false);
+    FrontR.rotateFor(-1*turn,vex::rotationUnits::deg,35, velocityUnits::pct, true);
+    stop();
 }
 
 void DriveTrain::stop(){ //stop all motors
