@@ -141,7 +141,8 @@ void autonRedBack() {
   //task::sleep(100);
   DriveTrain::getInstance() -> moveForward(ONE_TILE*.5, 30);
   //task::sleep(200);
-  Intake::getInstance() -> setPos(0);
+  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
+  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   DriveTrain::getInstance() -> turnRight(25, 35);
 
   DriveTrain::getInstance() -> moveForward(-1*ONE_TILE*2, 75);
@@ -152,7 +153,8 @@ void autonRedBack() {
   DriveTrain::getInstance() -> turnLeft(90, 35);
 
   DriveTrain::getInstance() -> setDrivePower(15);
-  Intake::getInstance() -> setPos(0);
+  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
+  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   task::sleep(1000);
   stack();
   DriveTrain::getInstance()-> stop();
