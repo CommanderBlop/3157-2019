@@ -36,7 +36,7 @@ void autonRedFront() {
   task::sleep(350);
   // Intake::getInstance() -> setPos(0);
 
-  DriveTrain::getInstance() -> turnRight(38, 35, false);
+  DriveTrain::getInstance() -> turnRight(50, 35, false);
   task::sleep(150);
   // Intake::getInstance() -> setPos(1);
   intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -49,8 +49,8 @@ void autonRedFront() {
 
   //DriveTrain::getInstance() -> moveForward(ONE_TILE * -0.3, 35, false);
 
-  FrontR.rotateFor(-150, rotationUnits::deg, 45, velocityUnits::pct, false);
-  BackR.rotateFor(-150, rotationUnits::deg, 45, velocityUnits::pct, true);
+  FrontR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, false);
+  BackR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, true);
   
   task::sleep(300);
   BackL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, false);
@@ -58,8 +58,8 @@ void autonRedFront() {
   task::sleep(450);
   //DriveTrain::getInstance() -> moveForward(75, 25, false);
   
-  BackL.rotateFor(210, rotationUnits::deg, 45, velocityUnits::pct, false);
-  FrontL.rotateFor(210, rotationUnits::deg, 45, velocityUnits::pct, true);
+  BackL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, false);
+  FrontL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(450);
 
   //DriveTrain::getInstance() -> turnRight(120, 45, true);
@@ -68,7 +68,7 @@ void autonRedFront() {
 
   // DriveTrain::getInstance()->setDrivePower(-20);
   // task::sleep(500);
-  DriveTrain::getInstance() -> moveForward(1.43*ONE_TILE, 45, true);
+  DriveTrain::getInstance() -> moveForward(1.50*ONE_TILE, 45, true);
 
   // task::sleep(200);
   // DriveTrain::getInstance() -> turnRight(90, 35);
