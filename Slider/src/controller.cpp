@@ -8,7 +8,7 @@ void btnR1() {
     while (true) {
         if (con.ButtonR1.pressing()) {
           lastPressed = true;
-          Arm::getInstance() -> moveUp();
+          bar.spin(directionType::fwd, 35, velocityUnits::pct);
         } 
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
@@ -25,7 +25,7 @@ void btnR2() {
     while (true) {
         if (con.ButtonR2.pressing()) {
           lastPressed = true;
-          Arm::getInstance() -> moveDown();
+          bar.spin(directionType::rev, 35, velocityUnits::pct);
         } 
         else if (!con.ButtonR2.pressing() && lastPressed) {
             lastPressed = false;

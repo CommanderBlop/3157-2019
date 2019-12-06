@@ -4,6 +4,7 @@ using namespace vex;
 using signature = vision::signature;
 using code = vision::code;
 
+
 // A global instance of brain used for printing to the V5 Brain screen
 
 
@@ -28,7 +29,7 @@ vex::motor bar(vex::PORT4, vex::gearSetting::ratio36_1, false);
 
 vex::competition Competition;
 
-double ONE_TILE;
+double ONE_TILE = 2000/3;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.
