@@ -5,9 +5,9 @@ class DriveTrain{
     public:
         static DriveTrain* getInstance();
         void setDrivePower(int power); //power in %
-        void turnLeft(int deg, int power);
-        void turnRight(int deg, int power);
+        void turnLeft(int deg, int power, bool ramp);
+        void turnRight(int deg, int power, bool ramp);
         void stop(); //stop breakType is break
-        void moveForward(int deg, int power);
-        void moveBackward(int deg, int power);
+        void moveForward(int deg, int power, bool ramp);
+        void moveBackward(int deg, int power, bool ramp);
 };

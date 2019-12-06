@@ -29,7 +29,10 @@ int main() {
   // task::sleep(250);
   //pre_auton();
   //DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
-  userControl();
+  
   //autonRedBack();
   //autonRedFront();
+  userControl();
+  
+  
 }

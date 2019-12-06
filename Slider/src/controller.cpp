@@ -13,7 +13,7 @@ void btnR1() {
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
             bar.stop(brakeType::hold);
-            
+            angler.stop();
         }
         this_thread::yield(); 
     }
@@ -123,7 +123,7 @@ void joyStick() {
     }
 
     if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-          angler.spin(vex::directionType::fwd, con.Axis2.position(pct), vex::velocityUnits::pct);
+          angler.spin(vex::directionType::fwd, 0.75* con.Axis2.position(pct), vex::velocityUnits::pct);
     } else {
           angler.stop(brakeType::hold);
     }

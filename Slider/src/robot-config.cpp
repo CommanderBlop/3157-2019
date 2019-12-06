@@ -20,8 +20,8 @@ vex::motor FrontR(vex::PORT12, vex::gearSetting::ratio18_1, true);
 vex::motor BackL(vex::PORT10, vex::gearSetting::ratio18_1, false);
 vex::motor FrontL(vex::PORT19, vex::gearSetting::ratio18_1, false);
 
-vex::motor intakeL(vex::PORT9, vex::gearSetting::ratio18_1, false);
-vex::motor intakeR(vex::PORT8, vex::gearSetting::ratio18_1, false);
+vex::motor intakeL(vex::PORT8, vex::gearSetting::ratio18_1, false);
+vex::motor intakeR(vex::PORT7, vex::gearSetting::ratio18_1, false);
 
 vex::motor angler(vex::PORT15, vex::gearSetting::ratio36_1, true);
 
