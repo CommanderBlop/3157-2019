@@ -14,12 +14,12 @@ Intake* Intake::getInstance() {
 void Intake::updateState() { //intake state change
   switch(position) {
     case 1: //intake
-      intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
-      intakeR.spin(directionType::rev, 100, velocityUnits::pct);
+      intakeL.spin(directionType::fwd, 90, velocityUnits::pct);
+      intakeR.spin(directionType::rev, 90, velocityUnits::pct);
       break;
     case -1: //outtake
-      intakeL.spin(directionType::rev, 100, velocityUnits::pct);
-      intakeR.spin(directionType::fwd, 100, velocityUnits::pct);
+      intakeL.spin(directionType::rev, 90, velocityUnits::pct);
+      intakeR.spin(directionType::fwd, 90, velocityUnits::pct);
       break;
     case 0: //stop
       intakeL.stop(brake);

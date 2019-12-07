@@ -9,16 +9,10 @@ void btnR1() {
         if (con.ButtonR1.pressing()) {
           lastPressed = true;
           bar.spin(directionType::fwd, 35, velocityUnits::pct);
-          if(!angler.isSpinning() && fmax(angler.rotation(rotationUnits::deg), -1*angler.rotation(rotationUnits::deg)) < 300) {
-            angler.spin(directionType::fwd, 40, velocityUnits::pct);
-          } else {
-            angler.stop(brakeType::brake);
-          }
         } 
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
             bar.stop(brakeType::hold);
-            angler.stop();
         }
         this_thread::yield(); 
     }
