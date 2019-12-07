@@ -13,6 +13,7 @@ extern competition Competition;
 
 //decalre global variable
 extern int mode;
+extern double ONE_TILE;
 
 // VEXcode devices
 
