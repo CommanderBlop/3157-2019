@@ -9,6 +9,11 @@ void btnR1() {
         if (con.ButtonR1.pressing()) {
           lastPressed = true;
           bar.spin(directionType::fwd, 35, velocityUnits::pct);
+          if(!angler.isSpinning() && fmax(angler.rotation(rotationUnits::deg), -1*angler.rotation(rotationUnits::deg)) < 300) {
+            angler.spin(directionType::fwd, 40, velocityUnits::pct);
+          } else {
+            angler.stop(brakeType::brake);
+          }
         } 
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
@@ -25,7 +30,6 @@ void btnR2() {
     while (true) {
         if (con.ButtonR2.pressing()) {
           lastPressed = true;
-          bar.spin(directionType::rev, 35, velocityUnits::pct);
         } 
         else if (!con.ButtonR2.pressing() && lastPressed) {
             lastPressed = false;
@@ -116,14 +120,14 @@ void joyStick() {
         FrontL.stop(brakeType::brake);
       }
     } else {
-      BackR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
-      FrontR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
-      BackL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
-      FrontL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
+      BackR.spin(vex::directionType::fwd, y - x * 0.6, vex::velocityUnits::pct);
+      FrontR.spin(vex::directionType::fwd, y - x * 0.6, vex::velocityUnits::pct);
+      BackL.spin(vex::directionType::fwd, y + x * 0.6, vex::velocityUnits::pct);
+      FrontL.spin(vex::directionType::fwd, y + x * 0.6, vex::velocityUnits::pct);
     }
 
     if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-          angler.spin(vex::directionType::fwd, 0.75* con.Axis2.position(pct), vex::velocityUnits::pct);
+          angler.spin(vex::directionType::fwd, 0.75 * con.Axis2.position(pct), vex::velocityUnits::pct);
     } else {
           angler.stop(brakeType::hold);
     }

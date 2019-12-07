@@ -12,42 +12,65 @@ void stack() {
   DriveTrain::getInstance()-> stop();
   //angler.rotateTo(0, rotationUnits::deg, 45, velocityUnits::pct, false);
 }
+
+void backUp() {
+  bar.resetRotation();
+  bar.rotateTo(200, rotationUnits::deg, false);
+  Intake::getInstance() -> setPos(1);
+  bar.rotateTo(0, rotationUnits::deg, false);
+
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.9, 60, true);
+  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
+  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
+  task::sleep(500);
+
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*-1.75, 60, true);
+  DriveTrain::getInstance() -> setDrivePower(-15);
+  task::sleep(1000);
+  
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.30, 30, true);
+  task::sleep(300);
+
+  DriveTrain::getInstance() -> turnRight(90, 35, true);
+  task::sleep(300);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.50, 30, true);
+
+  stack();
+}
 /*
    Start between R1-5 and R1-6, expand while moving forward, storing the preload, and suck up four cubes in R2-5 to R3-5. Turn around and put cubes in R1-6. 
 	 5 pts.
   */
 void autonRedFront() {
-  //expand while moving forward
   bar.resetRotation();
   bar.rotateTo(200, rotationUnits::deg, false);
-  //Intake::getInstance() -> setPos(-1);
   Intake::getInstance() -> setPos(1);
   bar.rotateTo(0, rotationUnits::deg, false);
+
   DriveTrain::getInstance() -> moveForward(ONE_TILE*1.9, 60, true);
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   task::sleep(300);
 
   DriveTrain::getInstance() -> turnLeft(27, 35, false);
-  // Intake::getInstance() -> setPos(1);
   task::sleep(300);
+
   DriveTrain::getInstance() -> moveForward(-1.78 * ONE_TILE, 65, true);
-  
   task::sleep(350);
-  // Intake::getInstance() -> setPos(0);
+
 
   DriveTrain::getInstance() -> turnRight(50, 35, false);
   task::sleep(150);
-  // Intake::getInstance() -> setPos(1);
+
   intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
   intakeR.spin(directionType::rev, 100, velocityUnits::pct);
   DriveTrain::getInstance() -> moveForward(ONE_TILE * 1.7, 60, true);
   task::sleep(300);
-  // Intake::getInstance()->setPos(0);
+
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
 
-  //DriveTrain::getInstance() -> moveForward(ONE_TILE * -0.3, 35, false);
+
 
   FrontR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, false);
   BackR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, true);
@@ -56,76 +79,17 @@ void autonRedFront() {
   BackL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, false);
   FrontL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(450);
-  //DriveTrain::getInstance() -> moveForward(75, 25, false);
+
   
   BackL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, false);
   FrontL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(450);
 
-  //DriveTrain::getInstance() -> turnRight(120, 45, true);
-  
-  //DriveTrain::getInstance() -> moveForward(-2*ONE_TILE, 60, false);
-
-  // DriveTrain::getInstance()->setDrivePower(-20);
-  // task::sleep(500);
   DriveTrain::getInstance() -> moveForward(1.50*ONE_TILE, 45, true);
-
-  // task::sleep(200);
-  // DriveTrain::getInstance() -> turnRight(90, 35);
-
-  // // Intake::getInstance() -> setPos(1);
-  // task::sleep(100);
-  // DriveTrain::getInstance() -> moveForward(1*ONE_TILE, 55);
-
-  // DriveTrain::getInstance() -> setDrivePower(10);
 
   Intake::getInstance() -> setPos(0);
 
-  // task::sleep(500);
-
-
-  // DriveTrain::getInstance()-> setDrivePower(15);
-  //task::sleep(50);
-
-
   stack();
-
-
-
-    
-  // //storing preload
-  
-
-  //suck up four cubes in R2-5 to R3-5
-  //DriveTrain::getInstance() -> stop(); //can use encoder degree during tests
-
-  //nudge stack and back
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/25,5);
-  // task::sleep(300);
-
-  // DriveTrain::getInstance() -> moveBackward(ONE_TILE*1/4, 50);
-  // task::sleep(500);
-
-  // //Turn around and move forward
-
-  // DriveTrain::getInstance() -> stop();
-  // task::sleep(300);
-  // DriveTrain::getInstance() -> turnRight(80);
-
-  // //drive to R1-6
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/4, 50);
-  // task::sleep(700);
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/4, 25);
-  // task::sleep(500);
-  // DriveTrain::getInstance() -> stop();
-  // task::sleep(300);
-
-  // //stack
-  // angler.rotateTo(-550, rotationUnits::deg, 30, velocityUnits::pct, true);
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/10, 15);
-  // task::sleep(100);
-  // DriveTrain::getInstance() -> moveBackward(ONE_TILE*1/4, 15);
-  // task::sleep(500);
 }
 
 /*
@@ -133,34 +97,14 @@ void autonRedFront() {
     6 pts.
  */
 void autonRedBack() {
- // Arm::getInstance() -> lowTower();
+  bar.resetRotation();
+  bar.rotateTo(200, rotationUnits::deg, false);
   Intake::getInstance() -> setPos(1);
-  task::sleep(300);
+
+  bar.rotateTo(0, rotationUnits::deg, false);
   DriveTrain::getInstance() -> moveForward(ONE_TILE*1.50, 50, true);
-  //task::sleep(200);
-    
-  //storing preload
-  Arm::getInstance() -> toZero();
-  //Intake::getInstance() -> setPos(0);
 
-  //suck up four cubes in R2-5 to R3-5
- // task::sleep(1000); //can use encoder degree during tests
-
-  //nudge stack and back
- // DriveTrain::getInstance() -> moveForward(-1*ONE_TILE*.5, 50);
-  //task::sleep(500);
-
-  //DriveTrain::getInstance() -> setDrivePower(-25);
-  //task::sleep(500);
-
- // Intake::getInstance() -> setPos(1);
-
-  //Turn around and move forward
-
- // DriveTrain::getInstance() -> stop();
-  //task::sleep(100);
   DriveTrain::getInstance() -> moveForward(ONE_TILE*.5, 30, true);
-  //task::sleep(200);
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   DriveTrain::getInstance() -> turnRight(25, 35, true);
@@ -183,144 +127,64 @@ void autonRedBack() {
 
 
 void autonBlueFront() {
- //expand while moving forward
   bar.resetRotation();
   bar.rotateTo(200, rotationUnits::deg, false);
-  //Intake::getInstance() -> setPos(-1);
   Intake::getInstance() -> setPos(1);
   bar.rotateTo(0, rotationUnits::deg, false);
+
   DriveTrain::getInstance() -> moveForward(ONE_TILE*1.9, 60, true);
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   task::sleep(300);
 
   DriveTrain::getInstance() -> turnRight(27, 35, false);
-  // Intake::getInstance() -> setPos(1);
+
   task::sleep(300);
   DriveTrain::getInstance() -> moveForward(-1.78 * ONE_TILE, 65, true);
   
   task::sleep(350);
-  // Intake::getInstance() -> setPos(0);
 
-  DriveTrain::getInstance() -> turnLeft(38, 35, false);
+  DriveTrain::getInstance() -> turnLeft(50, 35, false);
   task::sleep(150);
-  // Intake::getInstance() -> setPos(1);
+
   intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
   intakeR.spin(directionType::rev, 100, velocityUnits::pct);
   DriveTrain::getInstance() -> moveForward(ONE_TILE * 1.7, 60, true);
+
   task::sleep(300);
-  // Intake::getInstance()->setPos(0);
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
 
-  //DriveTrain::getInstance() -> moveForward(ONE_TILE * -0.3, 35, false);
-
-  FrontR.rotateFor(-150, rotationUnits::deg, 45, velocityUnits::pct, false);
-  BackR.rotateFor(-150, rotationUnits::deg, 45, velocityUnits::pct, true);
-  
+  FrontR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, false);
+  BackR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(300);
+
   BackL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, false);
   FrontL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(450);
-  //DriveTrain::getInstance() -> moveForward(75, 25, false);
   
-  BackL.rotateFor(210, rotationUnits::deg, 45, velocityUnits::pct, false);
-  FrontL.rotateFor(210, rotationUnits::deg, 45, velocityUnits::pct, true);
+  BackL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, false);
+  FrontL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, true);
   task::sleep(450);
 
-  //DriveTrain::getInstance() -> turnRight(120, 45, true);
-  
-  //DriveTrain::getInstance() -> moveForward(-2*ONE_TILE, 60, false);
+  DriveTrain::getInstance() -> moveForward(1.50*ONE_TILE, 45, true);
 
-  // DriveTrain::getInstance()->setDrivePower(-20);
-  // task::sleep(500);
-  DriveTrain::getInstance() -> moveForward(1.43*ONE_TILE, 45, true);
-
-  // task::sleep(200);
-  // DriveTrain::getInstance() -> turnRight(90, 35);
-
-  // // Intake::getInstance() -> setPos(1);
-  // task::sleep(100);
-  // DriveTrain::getInstance() -> moveForward(1*ONE_TILE, 55);
-
-  // DriveTrain::getInstance() -> setDrivePower(10);
 
   Intake::getInstance() -> setPos(0);
 
-  // task::sleep(500);
-
-
-  // DriveTrain::getInstance()-> setDrivePower(15);
-  //task::sleep(50);
-
-
   stack();
 
-
-
-    
-  // //storing preload
-  
-
-  //suck up four cubes in R2-5 to R3-5
-  //DriveTrain::getInstance() -> stop(); //can use encoder degree during tests
-
-  //nudge stack and back
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/25,5);
-  // task::sleep(300);
-
-  // DriveTrain::getInstance() -> moveBackward(ONE_TILE*1/4, 50);
-  // task::sleep(500);
-
-  // //Turn around and move forward
-
-  // DriveTrain::getInstance() -> stop();
-  // task::sleep(300);
-  // DriveTrain::getInstance() -> turnRight(80);
-
-  // //drive to R1-6
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/4, 50);
-  // task::sleep(700);
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/4, 25);
-  // task::sleep(500);
-  // DriveTrain::getInstance() -> stop();
-  // task::sleep(300);
-
-  // //stack
-  // angler.rotateTo(-550, rotationUnits::deg, 30, velocityUnits::pct, true);
-  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1/10, 15);
-  // task::sleep(100);
-  // DriveTrain::getInstance() -> moveBackward(ONE_TILE*1/4, 15);
-  // task::sleep(500);
 }
 
 void autonBlueBack() {
-   // Arm::getInstance() -> lowTower();
+bar.resetRotation();
+  bar.rotateTo(200, rotationUnits::deg, false);
   Intake::getInstance() -> setPos(1);
-  task::sleep(300);
+
+  bar.rotateTo(0, rotationUnits::deg, false);
   DriveTrain::getInstance() -> moveForward(ONE_TILE*1.50, 50, true);
-  //task::sleep(200);
-    
-  //storing preload
-  Arm::getInstance() -> toZero();
-  //Intake::getInstance() -> setPos(0);
 
-  //suck up four cubes in R2-5 to R3-5
- // task::sleep(1000); //can use encoder degree during tests
 
-  //nudge stack and back
- // DriveTrain::getInstance() -> moveForward(-1*ONE_TILE*.5, 50);
-  //task::sleep(500);
-
-  //DriveTrain::getInstance() -> setDrivePower(-25);
-  //task::sleep(500);
-
- // Intake::getInstance() -> setPos(1);
-
-  //Turn around and move forward
-
- // DriveTrain::getInstance() -> stop();
-  //task::sleep(100);
   DriveTrain::getInstance() -> moveForward(ONE_TILE*.5, 30, true);
   //task::sleep(200);
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
@@ -338,7 +202,7 @@ void autonBlueBack() {
   intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
   intakeR.spin(directionType::rev, 25, velocityUnits::pct);
   task::sleep(1000);
-  stack();
   DriveTrain::getInstance()-> stop();
+  stack();
 
 }

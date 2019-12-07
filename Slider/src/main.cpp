@@ -27,12 +27,12 @@ int main() {
   // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
   // while(!Brain.Screen.pressing()){}
   // task::sleep(250);
-  //pre_auton();
+  pre_auton();
   //DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
   
   //autonRedBack();
   //autonRedFront();
-  userControl();
+  //userControl();
   
   
 }
