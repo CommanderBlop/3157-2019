@@ -1,6 +1,5 @@
 using namespace vex;
 
-//declare motors
 extern brain Brain;
 extern motor BackL;
 extern motor BackR;
@@ -14,9 +13,6 @@ extern competition Competition;
 
 //decalre global variable
 extern int mode;
-
-
-
 
 // VEXcode devices
 

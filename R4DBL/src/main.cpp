@@ -1,3 +1,5 @@
+
+
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -7,6 +9,11 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 #include "vex.h"
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// ---- END VEXCODE CONFIGURED DEVICES ----
 //https://github.com/Kohmei358/RBE1001-Group1/blob/master/final.cpp
 
 using namespace vex;
@@ -29,7 +36,8 @@ int main() { //calibrate values, and enter OS screen.
   // Hugger::getInstance()->nextPos();
   // Hug.spin(directionType::fwd, 20, velocityUnits::rpm);
   // task::sleep(2000);
-
+  //armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.75, vex::velocityUnits::pct);
+  //armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.75, vex::velocityUnits::pct);
 
   // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map)); //this is anime
   // while(!Brain.Screen.pressing()){}
