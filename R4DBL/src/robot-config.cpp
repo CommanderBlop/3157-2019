@@ -5,7 +5,21 @@ using signature = vision::signature;
 using code = vision::code;
 
 // A global instance of brain used for printing to the V5 Brain screen
+
+motor      BackR(PORT1, gearSetting::ratio18_1, true);
+motor      FrontR(PORT2, gearSetting::ratio18_1, true);
+motor      BackL(PORT11, gearSetting::ratio18_1, false);
+motor      FrontL(PORT4, gearSetting::ratio18_1, false);
+motor      Hug(PORT20, gearSetting::ratio18_1, false);
+motor      armL(PORT5, gearSetting::ratio6_1, true);
+motor      armR(PORT16, gearSetting::ratio6_1, true);
+
+controller con(controllerType::primary);
+
+int mode = 0;
 brain  Brain;
+competition Competition;
+double ONE_TILE = 2000/3;
 
 // VEXcode device constructors
 
