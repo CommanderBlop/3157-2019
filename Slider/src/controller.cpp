@@ -1,18 +1,28 @@
 #include "vex.h"
 
 int ANGLER_LIMIT = -550; //the limit of the angler
-
+bool raise = false;
+bool raising = false;
 //arm up
 void btnR1() {
   static bool lastPressed = con.ButtonR1.pressing();
     while (true) {
         if (con.ButtonR1.pressing()) {
           lastPressed = true;
-          bar.spin(directionType::fwd, 35, velocityUnits::pct);
+          // if(angler.rotation(rotationUnits::deg) > -400 && !raise) {
+          //   angler.rotateTo(-450, rotationUnits::deg, -45, velocityUnits::pct, false);
+          //   raising = true;
+          // } else if(angler.rotation(rotationUnits::deg) < -400 && !raising){
+          //   raising = false;
+          //   raise = true;
+          // }
+          bar.spin(directionType::fwd, 90, velocityUnits::pct);
+          
         } 
         else if (!con.ButtonR1.pressing() && lastPressed) {
             lastPressed = false;
             bar.stop(brakeType::hold);
+            // raise = false;
         }
         this_thread::yield(); 
     }
@@ -24,6 +34,7 @@ void btnR2() {
     while (true) {
         if (con.ButtonR2.pressing()) {
           lastPressed = true;
+          bar.spin(directionType::rev, 90, velocityUnits::pct);
         } 
         else if (!con.ButtonR2.pressing() && lastPressed) {
             lastPressed = false;
@@ -46,8 +57,8 @@ void btnL1() {
 
         else if (!con.ButtonL1.pressing() && lastPressed) {
             lastPressed = false;
-            intakeL.stop(brakeType::brake);
-            intakeR.stop(brakeType::brake);
+            intakeL.stop(brakeType::coast);
+            intakeR.stop(brakeType::coast);
             //Intake::getInstance() -> nextPos();
         }
         this_thread::yield();
@@ -65,8 +76,8 @@ void btnL2() {
         }
         else if (!con.ButtonL2.pressing() && lastPressed) {
             lastPressed = false;
-            intakeL.stop(brakeType::brake);
-            intakeR.stop(brakeType::brake);
+            intakeL.stop(brakeType::coast);
+            intakeR.stop(brakeType::coast);
             //Intake::getInstance() -> prevPos();
         }
         this_thread::yield(); 
@@ -113,7 +124,7 @@ void joyStick() {
         FrontR.stop(brakeType::brake);
         FrontL.stop(brakeType::brake);
       }
-    } else {
+    } else { //mac likes 0.6 on turn
       BackR.spin(vex::directionType::fwd, y - x * 0.6, vex::velocityUnits::pct);
       FrontR.spin(vex::directionType::fwd, y - x * 0.6, vex::velocityUnits::pct);
       BackL.spin(vex::directionType::fwd, y + x * 0.6, vex::velocityUnits::pct);
@@ -125,7 +136,6 @@ void joyStick() {
     } else {
           angler.stop(brakeType::hold);
     }
-
     this_thread::yield();
   }
 }
@@ -174,66 +184,5 @@ void startThreads() {
 void userControl(void) {
   startThreads(); //start the threads for controller
   while(1) {vex::this_thread::sleep_for(25);}
-  // bool lastMovedFwd = false;
-  // while(1) {
-  //   double y = con.Axis3.position(pct);
-  //   double x = con.Axis1.position(pct) *  0.73;
-
-  //   if (fmax(x, x * -1) > 3) {
-  //     lastMovedFwd = false;
-  //   } else if (fmax(y, y * -1) > 3) {
-  //     lastMovedFwd = true;
-  //   }
-  //   if (fmax(y, y * -1) < 3 && fmax(x, x * -1) < 3) { // no input
-  //     if (lastMovedFwd == false) {
-  //       BackR.stop(brakeType::hold);
-  //       BackL.stop(brakeType::hold);
-  //       FrontR.stop(brakeType::hold);
-  //       FrontL.stop(brakeType::hold);
-  //     } else {
-  //       BackR.stop(brakeType::brake);
-  //       BackL.stop(brakeType::brake);
-  //       FrontR.stop(brakeType::brake);
-  //       FrontL.stop(brakeType::brake);
-  //     }
-  //   } else {
-  //     BackR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
-  //     FrontR.spin(vex::directionType::fwd, y - x, vex::velocityUnits::pct);
-  //     BackL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
-  //     FrontL.spin(vex::directionType::fwd, y + x, vex::velocityUnits::pct);
-  //   }
-  //   task::sleep(30);
-  //   vex::this_thread::sleep_for(25);
-  // }
-  // BackL.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 + con.Axis1.position(pct), vex::velocityUnits::pct);
-  // BackR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
-  // FrontR.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 - con.Axis1.position(pct), vex::velocityUnits::pct);
-  // FrontL.spin(vex::directionType::fwd, con.Axis3.position(pct) * 0.75 + con.Axis1.position(pct), vex::velocityUnits::pct);
-  
-  // if(con.ButtonL1.pressing() && mode <= 1) {
-  //   while(con.ButtonL1.pressing());
-  //   mode++;
-  // } else if(con.ButtonL2.pressing() && mode >= -1) {
-  //   while(con.ButtonL2.pressing());
-  //   mode--;
-  // }
-
-  // if(mode == 1) {
-  //   intakeL.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-  //   intakeR.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-  // } else if(mode == -1) {
-  //   intakeL.spin(vex::directionType::rev, 75, vex::velocityUnits::pct);
-  //   intakeR.spin(vex::directionType::fwd, 75, vex::velocityUnits::pct);
-  // } else if(mode == 0) {
-  //   intakeL.stop(brakeType::hold);
-  //   intakeR.stop(brakeType::hold);
-  // }
-  // if(con.Axis2.position(pct) < -7 || con.Axis2.position(pct) > 7) {
-  //   armL.spin(vex::directionType::fwd, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-  //   armR.spin(vex::directionType::rev, con.Axis2.position(pct) * 0.25, vex::velocityUnits::pct);
-  // } else {
-  //   armL.stop(brakeType::hold);
-  //   armR.stop(brakeType::hold);
-  // }
 }
 

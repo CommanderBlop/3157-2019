@@ -24,11 +24,15 @@ using namespace vex;
 // Main
 
 int main() {
+  //angler.rotateTo(655, rotationUnits::deg, 45, velocityUnits::pct, true);
   // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
   // while(!Brain.Screen.pressing()){}
   // task::sleep(250);
-  pre_auton();
-  //DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
+  //autonomous();
+  //oneCubeRed();
+  //pre_auton();
+  //autonRedBack();
+  //backUp();//DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
   
   //autonRedBack();
   //autonRedFront();

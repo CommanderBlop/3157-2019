@@ -78,6 +78,7 @@ void SetUpScreen::waitForInput(int Screen) {
   if(Screen == 0) { //if at main screen
     if ((x > 160 && x < 320 && y > 55 && y < 148)) { //if pressed select auton
         //display auton route
+        task::sleep(500);
         Brain.Screen.clearScreen();
         Brain.Screen.setFillColor(red);
         Brain.Screen.setPenColor(white);
@@ -85,16 +86,16 @@ void SetUpScreen::waitForInput(int Screen) {
         Brain.Screen.drawRectangle(5, 122, 232, 112);
         Brain.Screen.drawRectangle(5, 5, 232, 112);
         Brain.Screen.printAt(85, 60, "Red");
-        Brain.Screen.printAt(95, 80, "Front");
+        Brain.Screen.printAt(95, 80, "Small");
         Brain.Screen.printAt(85, 177, "Red");
-        Brain.Screen.printAt(105, 197, "Back");
+        Brain.Screen.printAt(105, 197, "Big");
         Brain.Screen.setFillColor(blue);
         Brain.Screen.drawRectangle(242, 5, 232, 112);
         Brain.Screen.drawRectangle(242, 122, 232, 112);
         Brain.Screen.printAt(312, 60, "Blue");
-        Brain.Screen.printAt(327, 80, "Front");
+        Brain.Screen.printAt(327, 80, "Small");
         Brain.Screen.printAt(312, 177, "Blue");
-        Brain.Screen.printAt(334, 197, "Back");
+        Brain.Screen.printAt(334, 197, "Big");
         Brain.Screen.render();
         waitForInput(1);
     } else if(x > 320 && x < 480 && y > 55 && y < 148) { //display skills
@@ -188,15 +189,19 @@ void autonomous(void) { //run auton based on auton selected
     switch(autonMode) {
       case RedFront:
         autonRedFront();
+        // oneCubeRed();
         break;
       case RedBack:
-        autonRedBack();
+        // autonRedBack();
+        oneCubeRed();
         break;
       case BlueFront:
-        autonBlueFront();
+        // autonBlueFront();
+        oneCubeBlue();
         break;
       case BlueBack:
-        autonBlueBack();
+        // autonBlueBack();
+        oneCubeBlue();
         break;
       default:
         Brain.Screen.clearScreen();
