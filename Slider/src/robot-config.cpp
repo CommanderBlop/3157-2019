@@ -29,6 +29,8 @@ vex::motor bar(vex::PORT4, vex::gearSetting::ratio6_1, false);
 
 vex::competition Competition;
 
+gyro Gyro(Brain.ThreeWirePort.G);
+
 double ONE_TILE = 2000/3;
 
 /**

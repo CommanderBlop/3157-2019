@@ -11,6 +11,7 @@ extern motor intakeL;
 extern motor intakeR;
 extern motor angler;
 extern motor bar;
+extern gyro Gyro;
 
 
 extern controller con;

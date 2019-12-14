@@ -10,4 +10,7 @@ class DriveTrain{
         void stop(); //stop breakType is break
         void moveForward(int deg, int power, bool ramp);
         void moveBackward(int deg, int power, bool ramp);
+        void gyroTurnLeft(int deg);
+        void gyroTurnRight(int deg);
+        void hold();
 };

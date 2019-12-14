@@ -179,6 +179,15 @@ void startThreads() {
   vex::thread t = thread(displayFinalScreen);
 }
 
+void GyroDisplay() {
+  Brain.Screen.setFont(fontType::mono60);
+  while(true) {
+    Brain.Screen.clearLine();
+    Brain.Screen.print(Gyro.value(rotationUnits::deg));
+    Brain.Screen.render();
+    this_thread::yield(); 
+  }
+}
 
 
 void userControl(void) {

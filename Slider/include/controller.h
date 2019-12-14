@@ -19,3 +19,5 @@ void arm();
 void startThreads();
 
 void userControl(void);
+
+void GyroDisplay();

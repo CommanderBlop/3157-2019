@@ -82,11 +82,19 @@ void DriveTrain::turnRight(int deg, int power, bool ramp){//turn right with an i
 }
 
 void DriveTrain::stop(){ //stop all motors
-    FrontL.stop();
-    FrontR.stop();
-    BackL.stop();
-    BackR.stop();
+    FrontL.stop(brakeType::brake);
+    FrontR.stop(brakeType::brake);
+    BackL.stop(brakeType::brake);
+    BackR.stop(brakeType::brake);
 }
+
+void DriveTrain::hold() {
+  FrontL.stop(brakeType::hold);
+  FrontR.stop(brakeType::hold);
+  BackL.stop(brakeType::hold);
+  BackR.stop(brakeType::hold);
+}
+
 
 void DriveTrain::moveForward(int degree, int power, bool ramp) {
   Brain.resetTimer();
@@ -146,4 +154,69 @@ void DriveTrain::moveBackward(int degree, int power, bool ramp) {
   }
 
   DriveTrain::getInstance() -> stop();
+}
+
+void DriveTrain::gyroTurnLeft(int deg) {
+  BackL.spin(directionType::rev,30,velocityUnits::pct);
+  BackR.spin(directionType::fwd,30,velocityUnits::pct);
+  FrontL.spin(directionType::rev,30,velocityUnits::pct);
+  FrontR.spin(directionType::fwd,30,velocityUnits::pct);
+  while(fmax(Gyro.value(rotationUnits::deg), -1*Gyro.value(rotationUnits::deg)) < deg ) {}
+  DriveTrain::getInstance()->stop();
+}
+
+void DriveTrain::gyroTurnRight(int degree) {
+  double start = Gyro.value(rotationUnits::deg);
+  int deg = degree * 0.96;
+  int stage_1 = 30;
+  int stage_2 = 20;
+  int stage_3 = 8;
+  //     BackL.spin(directionType::fwd,stage_1,velocityUnits::pct);
+  //   BackR.spin(directionType::rev,stage_1,velocityUnits::pct);
+  //   FrontL.spin(directionType::fwd,stage_1,velocityUnits::pct);
+  //   FrontR.spin(directionType::rev,stage_1,velocityUnits::pct);
+  // while(fmax(start - Gyro.value(rotationUnits::deg), -1*start - Gyro.value(rotationUnits::deg)) < degree - 15) {
+  //       task::sleep(5);
+  // }
+  //   FrontL.stop(brakeType::hold);
+  //   FrontR.stop(brakeType::hold);
+  //   BackL.stop(brakeType::hold);
+    BackR.stop(brakeType::hold);  
+  while(start - Gyro.value(rotationUnits::deg) < deg * 0.7) {
+    BackL.spin(directionType::fwd,stage_1,velocityUnits::pct);
+    BackR.spin(directionType::rev,stage_1,velocityUnits::pct);
+    FrontL.spin(directionType::fwd,stage_1,velocityUnits::pct);
+    FrontR.spin(directionType::rev,stage_1,velocityUnits::pct);
+    //if(pwr > 10) pwr--;
+  }
+  while(start - Gyro.value(rotationUnits::deg) < deg * 0.85) {
+    BackL.spin(directionType::fwd,stage_2,velocityUnits::pct);
+    BackR.spin(directionType::rev,stage_2,velocityUnits::pct);
+    FrontL.spin(directionType::fwd,stage_2,velocityUnits::pct);
+    FrontR.spin(directionType::rev,stage_2,velocityUnits::pct);
+    //if(pwr > 10) pwr--;
+  }
+  while(start - Gyro.value(rotationUnits::deg) < deg * 1.0001) {
+    BackL.spin(directionType::fwd,stage_3,velocityUnits::pct);
+    BackR.spin(directionType::rev,stage_3,velocityUnits::pct);
+    FrontL.spin(directionType::fwd,stage_3,velocityUnits::pct);
+    FrontR.spin(directionType::rev,stage_3,velocityUnits::pct);
+    //if(pwr > 10) pwr--;
+  }
+  task::sleep(200);
+  DriveTrain::getInstance()->stop();
+  while(fmax(degree - Gyro.value(rotationUnits::deg), -1*degree - Gyro.value(rotationUnits::deg)) > 1.5 ) {
+    if(start - Gyro.value(rotationUnits::deg) > deg) {
+      BackL.spin(directionType::rev,6,velocityUnits::pct);
+      BackR.spin(directionType::fwd,6,velocityUnits::pct);
+      FrontL.spin(directionType::rev,6,velocityUnits::pct);
+      FrontR.spin(directionType::fwd,6,velocityUnits::pct);
+    } else if(start - Gyro.value(rotationUnits::deg) < deg) {
+      BackL.spin(directionType::fwd,6,velocityUnits::pct);
+      BackR.spin(directionType::rev,6,velocityUnits::pct);
+      FrontL.spin(directionType::fwd,6,velocityUnits::pct);
+      FrontR.spin(directionType::rev,6,velocityUnits::pct);
+    }
+  }
+  DriveTrain::getInstance()->hold();
 }

@@ -24,6 +24,8 @@ using namespace vex;
 // Main
 
 int main() {
+  Gyro.calibrate();
+  while(Gyro.isCalibrating()) {}
   //angler.rotateTo(655, rotationUnits::deg, 45, velocityUnits::pct, true);
   // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
   // while(!Brain.Screen.pressing()){}
@@ -37,6 +39,11 @@ int main() {
   //autonRedBack();
   //autonRedFront();
   //userControl();
-  
+  vex::thread gygy = thread(GyroDisplay);
+  for(int i = 0; i < 4; i++) {
+
+    DriveTrain::getInstance()->gyroTurnRight(90);
+    task::sleep(500);
+  }
   
 }
