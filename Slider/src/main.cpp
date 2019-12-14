@@ -39,11 +39,13 @@ int main() {
   //autonRedBack();
   //autonRedFront();
   //userControl();
-  vex::thread gygy = thread(GyroDisplay);
-  for(int i = 0; i < 4; i++) {
-
-    DriveTrain::getInstance()->gyroTurnRight(90);
-    task::sleep(500);
-  }
+  //vex::thread gygy = thread(GyroDisplay);
+  // for(int i = 0; i < 4; i++) {
+    
+  //   task::sleep(500);
+  // }
+  //DriveTrain::getInstance()->turnLeft(200, 30, false);
+  DriveTrain::getInstance()->gyroTurnRight(360);
+  task::sleep(1000);
   
 }
