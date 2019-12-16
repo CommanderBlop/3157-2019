@@ -24,8 +24,12 @@ using namespace vex;
 // Main
 
 int main() {
+  // stack();
   Gyro.calibrate();
   while(Gyro.isCalibrating()) {}
+  angler.resetPosition();
+  angler.resetRotation();
+  con.rumble("*");
   //angler.rotateTo(655, rotationUnits::deg, 45, velocityUnits::pct, true);
   // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
   // while(!Brain.Screen.pressing()){}
@@ -45,7 +49,7 @@ int main() {
   //   task::sleep(500);
   // }
   //DriveTrain::getInstance()->turnLeft(200, 30, false);
-  DriveTrain::getInstance()->gyroTurnRight(360);
-  task::sleep(1000);
-  
+  //DriveTrain::getInstance()->gyroTurnRight(360);
+  //task::sleep(1000);
+  autonRedFront();
 }

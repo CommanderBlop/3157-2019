@@ -165,8 +165,8 @@ void DriveTrain::gyroTurnLeft(int deg) {
   DriveTrain::getInstance()->stop();
 }
 
-void DriveTrain::gyroTurnRight(int degree) {
-  //200 motor degree is 90.9 degree
+void DriveTrain::gyroTurnRight(int degree, bool correct) {
+
   Brain.Screen.clearScreen();
   Brain.Screen.setFont(fontType::mono60);
   Brain.Screen.setCursor(1,0);
@@ -174,72 +174,35 @@ void DriveTrain::gyroTurnRight(int degree) {
   Brain.Screen.print(start);
   double deg = degree/0.43;
   double pwr = 30;
-  // int deg = degree * 0.96;
-  // int stage_1 = 30;
-  // int stage_2 = 20;
-  // int stage_3 = 8;
   BackL.rotateFor(deg,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
   FrontL.rotateFor(deg, vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
   BackR.rotateFor(-1*deg,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
   FrontR.rotateFor(-1*deg,vex::rotationUnits::deg,pwr, velocityUnits::pct,true);
   while(BackL.isSpinning() || FrontL.isSpinning() || BackR.isSpinning() || FrontR.isSpinning()) {}
   DriveTrain::getInstance()->stop();
-  task::sleep(300);
+  task::sleep(250);
   double delta = Gyro.value(rotationUnits::deg) - start;
   Brain.Screen.setCursor(2,0);
   Brain.Screen.print("moved for: %f",delta);
   delta = Gyro.value(rotationUnits::deg) - (start - degree);
   Brain.Screen.setCursor(3,0);
   Brain.Screen.print(delta);
-//  if(fmax(delta, delta*-1) > 1.0) {
-      //delta= -1*degree - Gyro.value(rotationUnits::deg);
-      double move = delta/0.43;
-      pwr = 13;
-      BackL.rotateFor(move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
-      FrontL.rotateFor(move, vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
-      BackR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
-      FrontR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,true);
- //   }
+
+  if(correct) {
+     double move = delta/0.43;
+  pwr = 13;
+  BackL.rotateFor(move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  FrontL.rotateFor(move, vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  BackR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  FrontR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,true);
+
     while(BackL.isSpinning() || FrontL.isSpinning() || BackR.isSpinning() || FrontR.isSpinning()) {}
 
-
-  // while(start - Gyro.value(rotationUnits::deg) < deg * 0.7) {
-  //   BackL.spin(directionType::fwd,stage_1,velocityUnits::pct);
-  //   BackR.spin(directionType::rev,stage_1,velocityUnits::pct);
-  //   FrontL.spin(directionType::fwd,stage_1,velocityUnits::pct);
-  //   FrontR.spin(directionType::rev,stage_1,velocityUnits::pct);
-  // }
-  // while(start - Gyro.value(rotationUnits::deg) < deg * 0.85) {
-  //   BackL.spin(directionType::fwd,stage_2,velocityUnits::pct);
-  //   BackR.spin(directionType::rev,stage_2,velocityUnits::pct);
-  //   FrontL.spin(directionType::fwd,stage_2,velocityUnits::pct);
-  //   FrontR.spin(directionType::rev,stage_2,velocityUnits::pct);
-  //   //if(pwr > 10) pwr--;
-  // }
-  // while(start - Gyro.value(rotationUnits::deg) < deg * 1.0001) {
-  //   BackL.spin(directionType::fwd,stage_3,velocityUnits::pct);
-  //   BackR.spin(directionType::rev,stage_3,velocityUnits::pct);
-  //   FrontL.spin(directionType::fwd,stage_3,velocityUnits::pct);
-  //   FrontR.spin(directionType::rev,stage_3,velocityUnits::pct);
-  //   //if(pwr > 10) pwr--;
-  // }
-  // task::sleep(200);
-  // DriveTrain::getInstance()->stop();
-  // while(fmax(degree - Gyro.value(rotationUnits::deg), -1*degree - Gyro.value(rotationUnits::deg)) > 1.5 ) {
-  //   if(start - Gyro.value(rotationUnits::deg) > deg) {
-  //     BackL.spin(directionType::rev,6,velocityUnits::pct);
-  //     BackR.spin(directionType::fwd,6,velocityUnits::pct);
-  //     FrontL.spin(directionType::rev,6,velocityUnits::pct);
-  //     FrontR.spin(directionType::fwd,6,velocityUnits::pct);
-  //   } else if(start - Gyro.value(rotationUnits::deg) < deg) {
-  //     BackL.spin(directionType::fwd,6,velocityUnits::pct);
-  //     BackR.spin(directionType::rev,6,velocityUnits::pct);
-  //     FrontL.spin(directionType::fwd,6,velocityUnits::pct);
-  //     FrontR.spin(directionType::rev,6,velocityUnits::pct);
-  //   }
-  // }
   DriveTrain::getInstance()->stop();
-  task::sleep(100);
-  Brain.Screen.setCursor(5,0);
-  Brain.Screen.print(Gyro.value(rotationUnits::deg) - start);
+  // task::sleep(100);
+  // Brain.Screen.setCursor(5,0);
+  // Brain.Screen.print(Gyro.value(rotationUnits::deg) - start);
+  }
+ 
+
 }

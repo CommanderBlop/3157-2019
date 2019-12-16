@@ -11,6 +11,6 @@ class DriveTrain{
         void moveForward(int deg, int power, bool ramp);
         void moveBackward(int deg, int power, bool ramp);
         void gyroTurnLeft(int deg);
-        void gyroTurnRight(int deg);
+        void gyroTurnRight(int deg, bool correct);
         void hold();
 };
