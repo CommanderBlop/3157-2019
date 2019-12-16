@@ -44,9 +44,10 @@ void stack() {
   intakeL.stop(brakeType::coast);
   intakeR.stop(brakeType::coast);
   //DriveTrain::getInstance()->setDrivePower(4);
-  angler.rotateFor(4000, rotationUnits::deg, 30, velocityUnits::pct, true);
+  angler.rotateFor(3000, rotationUnits::deg, 55, velocityUnits::pct, true);
+  angler.rotateFor(1000, rotationUnits::deg, 25, velocityUnits::pct, true);
   //con.rumble("*-*");
-  task::sleep(350);
+  task::sleep(750);
   //DriveTrain::getInstance()->stop();
   
   DriveTrain::getInstance()->setDrivePower(-35);
