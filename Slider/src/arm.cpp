@@ -26,15 +26,34 @@ void Arm::moveDown() {
   bar.spin(vex::directionType::fwd, -35, vex::velocityUnits::pct);
 }
 
-
 void Arm::lowTower() { //raise/lower arm to reach low tower height
-  bar.rotateTo(LOW_TOWER, rotationUnits::deg, 50, velocityUnits::pct, false);
+  armCommand = false;
+  angler.stop(brake);
+  bar.stop();
 }
 
 void Arm::highTower() { //raise/lower arm to reach high tower height
-  bar.rotateTo(HIGH_TOWER, rotationUnits::deg, 50, velocityUnits::pct, false);
+  //angler rises
+  armCommand = true;
+  angler.rotateTo(1000, rotationUnits::deg, 90, velocityUnits::pct, false);
+  task::sleep(300);
+    bar.rotateTo(HIGH_TOWER, rotationUnits::deg, 90, velocityUnits::pct, true);
+  // angler.rotateTo(1000, rotationUnits::deg, 90, velocityUnits::pct, true);
+  
+  //arm rotate to high max
+
+  armCommand = false;
 }
 
 void Arm::toZero() { //arm rotate to original position
-  bar.rotateTo(0, rotationUnits::deg, 50, velocityUnits::pct, false);
+  //arm rotate to low max
+  armCommand = true;
+  bar.rotateTo(1300, rotationUnits::deg, -90, velocityUnits::pct, true);
+  //task::sleep(300);
+  angler.rotateTo(50, rotationUnits::deg, -45, velocityUnits::pct, false);
+  bar.rotateTo(50, rotationUnits::deg, -90, velocityUnits::pct, true);
+
+  
+  //arm rotate to high max
+  armCommand = false;
 }

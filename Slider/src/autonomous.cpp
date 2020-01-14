@@ -37,21 +37,20 @@ void oneCubeBlue() {
 }
 
 void stack() {
-  //DriveTrain::getInstance()->setDrivePower(10);
-  // intakeL.spin(directionType::rev, 5, velocityUnits::pct);
-  // intakeR.spin(directionType::fwd, 5, velocityUnits::pct);
-  // task::sleep(100);
+  // intakeL.spin(directionType::rev, 8, velocityUnits::pct);
+  // intakeR.spin(directionType::fwd, 8, velocityUnits::pct);
+  // task::sleep(250);
   intakeL.stop(brakeType::coast);
   intakeR.stop(brakeType::coast);
-  //DriveTrain::getInstance()->setDrivePower(4);
-  angler.rotateFor(3000, rotationUnits::deg, 55, velocityUnits::pct, true);
+  DriveTrain::getInstance()->setDrivePower(4);
+  angler.rotateFor(3000, rotationUnits::deg, 40, velocityUnits::pct, true);
   angler.rotateFor(1000, rotationUnits::deg, 25, velocityUnits::pct, true);
   //con.rumble("*-*");
-  task::sleep(750);
+  task::sleep(300);
   //DriveTrain::getInstance()->stop();
   
   DriveTrain::getInstance()->setDrivePower(-35);
-  task::sleep(500);
+  task::sleep(1000);
   DriveTrain::getInstance()-> stop();
   //angler.rotateTo(0, rotationUnits::deg, 45, velocityUnits::pct, false);
 }
@@ -82,67 +81,79 @@ void backUp() {
 	 5 pts.
   */
 void autonRedFront() {
-  // bar.resetRotation();
-  // bar.rotateTo(200, rotationUnits::deg, false);
+  // vex::thread dis = thread(displayVal);
+    bar.resetRotation();
+  double start = Gyro.value(rotationUnits::deg);
+  angler.rotateTo(700, rotationUnits::deg, 90, velocityUnits::pct, false);
+  bar.rotateTo(700, rotationUnits::deg, 90, velocityUnits::pct, true);
+  bar.rotateTo(40, rotationUnits::deg, 90, velocityUnits::pct, true);
+  angler.rotateTo(40, rotationUnits::deg, 90, velocityUnits::pct, false);
   Intake::getInstance() -> setPos(1);
-  // bar.rotateTo(0, rotationUnits::deg, false);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.95, 65, false);
-  // intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  // intakeR.spin(directionType::rev, 25, velocityUnits::pct);
+  // DriveTrain::getInstance() -> moveForward(ONE_TILE*0.5, 35, false);
+  task::sleep(500);
+  // double delta = Gyro.value(rotationUnits::deg) - start;
+  // double move = delta/0.43;
+  // int pwr = 13;
+  // BackL.rotateFor(move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  // FrontL.rotateFor(move, vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  // BackR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,false);
+  // FrontR.rotateFor(-1*move,vex::rotationUnits::deg,pwr, velocityUnits::pct,true);
   
-  task::sleep(200);
-
-  DriveTrain::getInstance() -> gyroTurnRight(-25, true);
-  Intake::getInstance() -> setPos(0);
-  task::sleep(100);
-
-  
-  DriveTrain::getInstance() -> moveForward(-1.88 * ONE_TILE, 75, false);
-  task::sleep(400);
-
-
-  DriveTrain::getInstance() -> gyroTurnRight(30, false);
-  task::sleep(100);
-
-  Intake::getInstance() -> setPos(1);
-  // intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
-  // intakeR.spin(directionType::rev, 100, velocityUnits::pct);
-  Intake::getInstance() -> setPos(1);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE * 1.6, 60, false);
-  task::sleep(200);
-  
-  DriveTrain::getInstance() -> gyroTurnRight(150, true);
-  Intake::getInstance()->setPos(0);
-  task::sleep(200);
-
-  DriveTrain::getInstance() -> moveForward(1.43*ONE_TILE, 50, true);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.9, 50, true);
   task::sleep(300);
 
-  // intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  // intakeR.spin(directionType::rev, 25, velocityUnits::pct);
+  DriveTrain::getInstance() -> gyroTurnRight(-30, true);
+  task::sleep(350);
 
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.5, 35, false);
+  task::sleep(350);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*-0.5, 35, false);
+  Intake::getInstance() -> setPos(0);
+  task::sleep(350);
 
-
-  // FrontR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // BackR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, true);
-  
-  // task::sleep(300);
-  // BackL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // FrontL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // task::sleep(450);
-
-  
-  // BackL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // FrontL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // task::sleep(450);
-
-  // DriveTrain::getInstance() -> moveForward(1.50*ONE_TILE, 45, true);
-
-  // Intake::getInstance() -> setPos(0);
-
-
+  DriveTrain::getInstance() -> gyroTurnRight(-160, true);
+  task::sleep(350);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.87, 65, true);
+  task::sleep(350);
+  DriveTrain::getInstance() -> gyroTurnRight(-40, true);
+  task::sleep(350);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.66, 35, false);
+  // DriveTrain::getInstance()->setDrivePower(15);
+  // task::sleep(700);
+  DriveTrain::getInstance()->stop();
   stack();
+  // dis.interrupt();
+
+
+  // Brain.resetTimer();
+  // bar.resetRotation();
+  // bar.rotateTo(200, rotationUnits::deg, false);
+  // Intake::getInstance() -> setPos(1);
+  // bar.rotateTo(0, rotationUnits::deg, false);
+  // DriveTrain::getInstance() -> moveForward(ONE_TILE*1.85, 65, false);//1.95
+  // task::sleep(200);
+  // DriveTrain::getInstance() -> gyroTurnRight(-32, true);
+  // Intake::getInstance() -> setPos(0);
+  // task::sleep(100);
+  // DriveTrain::getInstance() -> moveForward(-1.75 * ONE_TILE, 75, false);
+  // task::sleep(450);
+  // DriveTrain::getInstance() -> gyroTurnRight(28, false);
+  // task::sleep(50);
+  // Intake::getInstance() -> setPos(1);
+  // DriveTrain::getInstance() -> moveForward(ONE_TILE * 1.65, 60, false);
+  // task::sleep(200);
+  // Gyro.resetRotation();
+  // BackL.spin(fwd, 65, velocityUnits::pct);
+  // FrontL.spin(fwd, 65, velocityUnits::pct);
+  // while(Gyro.rotation(rotationUnits::deg) > - 140) {}
+  // Intake::getInstance()->setPos(0);
+  // DriveTrain::getInstance()->stop();
+  // task::sleep(200);
+  // DriveTrain::getInstance() -> moveForward(1.48*ONE_TILE, 55, true);
+  // task::sleep(300);
+  // intakeL.stop(hold);
+  // intakeR.stop(hold);
+  // stack();
 }
 
 /*
@@ -150,115 +161,74 @@ void autonRedFront() {
     6 pts.
  */
 void autonRedBack() {
+  
   bar.resetRotation();
-  bar.rotateTo(200, rotationUnits::deg, false);
+  // bar.rotateTo(200, rotationUnits::deg, false);
   Intake::getInstance() -> setPos(1);
+  //bar.rotateTo(0, rotationUnits::deg, false);
+  angler.rotateFor(500, rotationUnits::deg, 35, velocityUnits::pct, false);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.45, 55, false);
+  task::sleep(1000);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.4, 40, false);
+  angler.rotateFor(-500, rotationUnits::deg, 35, velocityUnits::pct, false);
+  DriveTrain::getInstance() -> gyroTurnRight(-30, true);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.4, 40, false);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*-0.4, 40, false);
+  DriveTrain::getInstance() -> gyroTurnRight(30, true);
+  task::sleep(1000);
+  // intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
+  // intakeR.spin(directionType::rev, 25, velocityUnits::pct);
+  // DriveTrain::getInstance() -> turnRight(15, 35, true);
 
-  bar.rotateTo(0, rotationUnits::deg, false);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.50, 50, true);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*.5, 30, true);
-  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
-  DriveTrain::getInstance() -> turnRight(15, 35, true);
-
-  DriveTrain::getInstance() -> moveForward(-1*ONE_TILE*2, 75, true);
-  //Intake::getInstance() -> setPos(1);
-  DriveTrain::getInstance() -> setDrivePower(-20);
+  DriveTrain::getInstance() -> moveForward(-0.8*ONE_TILE, 55, true);
+  Intake::getInstance() -> setPos(0);
   task::sleep(500);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*.20, 25, false);
+  //Intake::getInstance() -> setPos(1);
+  // DriveTrain::getInstance() -> setDrivePower(-20);
+  DriveTrain::getInstance() -> gyroTurnRight(-120, true);
+  task::sleep(200);
+  Intake::getInstance() -> setPos(1);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.0, 50, true);
+  // angler.rotateFor(3000, rotationUnits::deg, 55, velocityUnits::pct, false);
+  intakeL.stop(brake);
+  intakeR.stop(brake);
   task::sleep(300);
-  DriveTrain::getInstance() -> turnLeft(105, 35, true);
-
+  DriveTrain::getInstance() -> gyroTurnRight(-30, true);
   task::sleep(300);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE * 0.3, 25, false);
+  DriveTrain::getInstance() -> moveForward(ONE_TILE*0.5, 25, false);
 
+    stack();
+  // while(angler.isSpinning()) {
+    
+  // }
+
+  // intakeL.stop(coast);
+  // intakeR.stop(coast);
+  // angler.rotateFor(1000, rotationUnits::deg, 25, velocityUnits::pct, true);
   //DriveTrain::getInstance() -> setDrivePower(15);
-  stack();
-  DriveTrain::getInstance()-> stop();
+
+  // DriveTrain::getInstance() -> setDrivePower(-15);
+  // task::sleep(1000);
+  // DriveTrain::getInstance()-> stop();
 
 }
 
 
 void autonBlueFront() {
-  bar.resetRotation();
-  bar.rotateTo(200, rotationUnits::deg, false);
-  Intake::getInstance() -> setPos(1);
-  bar.rotateTo(0, rotationUnits::deg, false);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.9, 60, true);
-  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
-  task::sleep(300);
-
-  DriveTrain::getInstance() -> turnRight(27, 35, false);
-
-  task::sleep(300);
-  DriveTrain::getInstance() -> moveForward(-1.78 * ONE_TILE, 65, true);
-  
-  task::sleep(350);
-
-  DriveTrain::getInstance() -> turnLeft(50, 35, false);
-  task::sleep(150);
-
-  intakeL.spin(directionType::fwd, 100, velocityUnits::pct);
-  intakeR.spin(directionType::rev, 100, velocityUnits::pct);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE * 1.7, 60, true);
-
-  // task::sleep(300);
-  // intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  // intakeR.spin(directionType::rev, 25, velocityUnits::pct);
-
-  // FrontR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // BackR.rotateFor(-275, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // task::sleep(300);
-
-  // BackL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // FrontL.rotateFor(625, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // task::sleep(450);
-  
-  // BackL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, false);
-  // FrontL.rotateFor(180, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // task::sleep(450);
-
-  // DriveTrain::getInstance() -> moveForward(1.50*ONE_TILE, 45, true);
-
-
-  // Intake::getInstance() -> setPos(0);
-
-  // stack();
-
-}
-
-void autonBlueBack() {
-  bar.resetRotation();
-  bar.resetRotation();
-  bar.rotateTo(200, rotationUnits::deg, false);
-  Intake::getInstance() -> setPos(1);
-
-  bar.rotateTo(0, rotationUnits::deg, false);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*1.50, 50, true);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*.5, 30, true);
-  intakeL.spin(directionType::fwd, 25, velocityUnits::pct);
-  intakeR.spin(directionType::rev, 25, velocityUnits::pct);
-  DriveTrain::getInstance() -> turnLeft(15, 35, true);
-
-  DriveTrain::getInstance() -> moveForward(-1*ONE_TILE*2, 75, true);
-  //Intake::getInstance() -> setPos(1);
-  DriveTrain::getInstance() -> setDrivePower(-20);
+  DriveTrain::getInstance() -> moveForward(-1.4 * ONE_TILE, 50, true);
+  DriveTrain::getInstance() -> moveForward(1.4 * ONE_TILE, 50, true);
+  task::sleep(1000);
+  DriveTrain::getInstance() -> gyroTurnRight(90, true);
   task::sleep(500);
-
-  DriveTrain::getInstance() -> moveForward(ONE_TILE*.20, 25, false);
-  task::sleep(200);
-  DriveTrain::getInstance() -> turnRight(105, 35, true);
-
-  task::sleep(200);
-  DriveTrain::getInstance() -> moveForward(ONE_TILE * 0.25, 25, false);
-
-  //DriveTrain::getInstance() -> setDrivePower(15);
-  stack();
-  DriveTrain::getInstance()-> stop();
-
+  Intake::getInstance()-> setPos(1);
+  DriveTrain::getInstance() -> moveForward(1.9 * ONE_TILE, 50, true);
+}
+void autonBlueBack() {
+  DriveTrain::getInstance() -> moveForward(-1.4 * ONE_TILE, 50, true);
+  DriveTrain::getInstance() -> moveForward(1.4 * ONE_TILE, 50, true);
+  task::sleep(1000);
+  DriveTrain::getInstance() -> gyroTurnRight(90, true);
+  task::sleep(500);
+  Intake::getInstance()-> setPos(1);
+  DriveTrain::getInstance() -> moveForward(1.9 * ONE_TILE, 50, true);
 }

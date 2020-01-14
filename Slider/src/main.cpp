@@ -29,27 +29,10 @@ int main() {
   while(Gyro.isCalibrating()) {}
   angler.resetPosition();
   angler.resetRotation();
-  con.rumble("*");
-  //angler.rotateTo(655, rotationUnits::deg, 45, velocityUnits::pct, true);
-  // Brain.Screen.drawImageFromBuffer(rose_map, 0, 0, sizeof(rose_map));
-  // while(!Brain.Screen.pressing()){}
-  // task::sleep(250);
-  //autonomous();
-  //oneCubeRed();
   //pre_auton();
   //autonRedBack();
-  //backUp();//DriveTrain::getInstance() -> moveForward(ONE_TILE, 35);
-  
-  //autonRedBack();
   //autonRedFront();
-  //userControl();
-  //vex::thread gygy = thread(GyroDisplay);
-  // for(int i = 0; i < 4; i++) {
-    
-  //   task::sleep(500);
-  // }
-  //DriveTrain::getInstance()->turnLeft(200, 30, false);
-  //DriveTrain::getInstance()->gyroTurnRight(360);
-  //task::sleep(1000);
-  autonRedFront();
+  // autonBlueBack();
+  // autonBlueFront();
+  userControl();
 }

@@ -1,5 +1,5 @@
 #include "vex.h"
-
+bool calibrated = false;
 enum AutonMode{RedFront, RedBack, BlueFront, BlueBack, NONE};
 AutonMode autonMode; //choose auton mode
 
@@ -14,7 +14,16 @@ void SetUpScreen::displayMain() { //display main
   Brain.Screen.setPenColor(white);
 
   //draw all the boxes
-  Brain.Screen.drawRectangle(5, 60, 153, 86);
+  if(calibrated) {
+    Brain.Screen.setFillColor(green);
+    Brain.Screen.drawRectangle(5, 60, 153, 86);
+    Brain.Screen.setFillColor(blue);
+  } else {
+    Brain.Screen.setFillColor(red);
+    Brain.Screen.drawRectangle(5, 60, 153, 86);
+    Brain.Screen.setFillColor(blue);
+  }
+  
   Brain.Screen.drawRectangle(5, 150, 153, 86);
   Brain.Screen.drawRectangle(163, 60, 153, 86);
   Brain.Screen.drawRectangle(163, 150, 153, 86);
@@ -29,19 +38,19 @@ void SetUpScreen::displayMain() { //display main
   switch(autonMode) { 
     case RedFront:
       Brain.Screen.setFillColor(red);
-      Brain.Screen.print("Current Auton: Red Front");
+      Brain.Screen.print("Current Auton: Red Small");
       break;
     case RedBack:
       Brain.Screen.setFillColor(red);
-      Brain.Screen.print("Current Auton: Red Back");
+      Brain.Screen.print("Current Auton: Red Big");
       break;
     case BlueFront:
       Brain.Screen.setFillColor(blue);
-      Brain.Screen.print("Current Auton: Blue Front");
+      Brain.Screen.print("Current Auton: Blue Small");
       break;
     case BlueBack:
       Brain.Screen.setFillColor(blue);
-      Brain.Screen.print("Current Auton: Blue Back");
+      Brain.Screen.print("Current Auton: Blue Big");
       break;
     case NONE:
       Brain.Screen.setFillColor(transparent);
@@ -50,9 +59,14 @@ void SetUpScreen::displayMain() { //display main
   }
 
   //display text in the box
+  if(calibrated) {
+    Brain.Screen.setFillColor(green);
+    Brain.Screen.printAt(30, 117, "Gyro");
+  } else {
+    Brain.Screen.setFillColor(red);
+    Brain.Screen.printAt(30, 117, "Gyro");
+  }
   Brain.Screen.setFillColor(blue);
-  Brain.Screen.setFont(fontType::prop40);
-  Brain.Screen.printAt(30, 117, "Cute");
   Brain.Screen.setFont(fontType::mono30);
   Brain.Screen.printAt(193, 98, "Select");
   Brain.Screen.printAt(201, 128, "Auton");
@@ -133,21 +147,28 @@ void SetUpScreen::waitForInput(int Screen) {
       }
       displayMain(); //return to main screen
     } else if(x > 320 && x < 480 && y > 148 && y < 240) { //competition selected!
-        Brain.Screen.clearScreen(green);
-        Brain.Screen.setFont(fontType::mono60);
-        Brain.Screen.setCursor(3, 0);
-        Brain.Screen.print("Competition");
-        Brain.Screen.render();
-        Competition.autonomous(autonomous);
-        Competition.drivercontrol(userControl);
-    } else if(x > 0 && x < 160 && y > 55 && y < 148) { //kawaiiiiiiiiiiiiii
+          Brain.Screen.clearScreen(green);
+          Brain.Screen.setFont(fontType::mono60);
+          Brain.Screen.setCursor(3, 0);
+          Brain.Screen.print("Competition");
+          Brain.Screen.render();
+          Competition.autonomous(autonomous);
+          Competition.drivercontrol(userControl);
+    } else if(x > 0 && x < 160 && y > 55 && y < 148) { 
       task::sleep(500);
-      bool lastPressed = Brain.Screen.pressing();
-      while(lastPressed) {}
-      vex::thread t = thread(displayFinalScreen);
-      while(!Brain.Screen.pressing()) {vex::this_thread::sleep_for(25);}
-      t.interrupt();
+      Brain.Screen.clearScreen(green);
+      Brain.Screen.setFont(fontType::mono40);
+      Brain.Screen.setCursor(3, 0);
+      Brain.Screen.print("Calibrating! Don't move.");
+      Brain.Screen.render();
+      Gyro.calibrate();
+      while(Gyro.isCalibrating()) {}
+      angler.resetPosition();
+      angler.resetRotation();
+      bar.resetPosition();
+      bar.resetRotation();
       task::sleep(500);
+      calibrated = true;
       displayMain();
     } else {
       displayMain();
@@ -192,16 +213,16 @@ void autonomous(void) { //run auton based on auton selected
         // oneCubeRed();
         break;
       case RedBack:
-        // autonRedBack();
-        oneCubeRed();
+        autonRedBack();
+        //oneCubeRed();
         break;
       case BlueFront:
-        // autonBlueFront();
-        oneCubeBlue();
+         autonBlueFront();
+        //oneCubeBlue();
         break;
       case BlueBack:
-        // autonBlueBack();
-        oneCubeBlue();
+         autonBlueBack();
+        //oneCubeBlue();
         break;
       default:
         Brain.Screen.clearScreen();

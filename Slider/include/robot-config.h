@@ -17,6 +17,8 @@ extern gyro Gyro;
 extern controller con;
 extern competition Competition;
 extern double ONE_TILE;
+extern bool armCommand;
+extern bool intakeLock;
 
 // VEXcode devices
 

@@ -14,16 +14,21 @@ Intake* Intake::getInstance() {
 void Intake::updateState() { //intake state change
   switch(position) {
     case 1: //intake
-      intakeL.spin(directionType::fwd, 90, velocityUnits::pct);
-      intakeR.spin(directionType::rev, 90, velocityUnits::pct);
+      intakeL.spin(directionType::fwd, 99, velocityUnits::pct);
+      intakeR.spin(directionType::rev, 99, velocityUnits::pct);
       break;
     case -1: //outtake
-      intakeL.spin(directionType::rev, 90, velocityUnits::pct);
-      intakeR.spin(directionType::fwd, 90, velocityUnits::pct);
+      intakeL.spin(directionType::rev, 99, velocityUnits::pct);
+      intakeR.spin(directionType::fwd, 99, velocityUnits::pct);
       break;
     case 0: //stop
-      intakeL.stop(brake);
-      intakeR.stop(brake);
+      if(angler.rotation(rotationUnits::deg) < 1500) {
+        intakeL.stop(hold);
+        intakeR.stop(hold);
+      } else {
+        intakeL.stop(coast);
+        intakeR.stop(coast);
+      }
       break;
   }
 }

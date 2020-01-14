@@ -10,6 +10,8 @@ void btnUp();
 
 void btnDown();
 
+void btnRight();
+
 //void slide();
 
 void joyStick();
@@ -21,3 +23,7 @@ void startThreads();
 void userControl(void);
 
 void GyroDisplay();
+
+void displayVal();
+
+void btnLeft();
