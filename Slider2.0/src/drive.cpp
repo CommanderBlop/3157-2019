@@ -7,10 +7,10 @@ Drive::Drive() {
 					 okapi::Motor(11, true, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees)});
   okapi::MotorGroup right({okapi::Motor(19, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees),
                    okapi::Motor(20, true, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees)});
-  leftMotors = std::shared_ptr<MotorGroup> (left);
-  rightMotors = std::shared_ptr<MotorGroup> (right);
+  leftMotors = std::make_shared<MotorGroup> (left);
+  rightMotors = std::make_shared<MotorGroup> (right);
   chassis = ChassisControllerBuilder()
-      .withMotors(LeftMotors, RightMotors)
+      .withMotors(leftMotors, rightMotors)
   		// .withGains(
   		// 		{0.005, 0, 0.0001}, // Distance controller gains
   		// 		{0.0027, 0, 0.0000001}, // Turn controller gains

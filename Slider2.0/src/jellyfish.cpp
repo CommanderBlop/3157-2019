@@ -3,8 +3,10 @@
 #include "jellyfish.hpp"
 
 Jellyfish::Jellyfish(){
-  okapi::MotorGroup RightMotors({19,-20});
-  okapi::MotorGroup LeftMotors({-11,12});
+  armMotor = std::make_shared<okapi::Motor> (okapi::Motor(10, false, AbstractMotor::gearset::red, AbstractMotor::encoderUnits::degrees));
+  anglerMotor = std::make_shared<okapi::Motor> (okapi::Motor(9, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees));
+  intakeMotors = std::make_shared<okapi::MotorGroup> (okapi::MotorGroup({okapi::Motor(1, false, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees),
+					 okapi::Motor(2, true, AbstractMotor::gearset::green, AbstractMotor::encoderUnits::degrees)}));
   drive = std::make_shared<Drive>();
 }
 
@@ -22,23 +24,23 @@ void Jellyfish::opControl(pros::Controller& joystick) {
 void Jellyfish::arm(pros::Controller& joystick) {
   int L1 = joystick.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
   int L2 = joystick.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-  if(L1 && ArmMotor.getPosition() > 50) {
-    ArmMotor.moveVelocity(90);
-  } else if(L2 && ArmMotor.getPosition() > 50) {
-    ArmMotor.moveVelocity(-90);
+  if(L1 && armMotor->getPosition() > 50) {
+    armMotor->moveVelocity(90);
+  } else if(L2 && armMotor->getPosition() > 50) {
+    armMotor->moveVelocity(-90);
   } else {
-    ArmMotor.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+    armMotor->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
   }
 }
 
 void Jellyfish::angler(pros::Controller &joystick) {
   int anglerPower = joystick.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-  if(anglerPower > - 10 && anglerPower < 10 ) anglerPower = 0;
-  if(AnglerMotor.getPosition() > 50 && AnglerMotor.getPosition() < ANGLER_MID) AnglerMotor.moveVelocity(anglerPower * 0.7);
-  else if(AnglerMotor.getPosition() > ANGLER_MID && AnglerMotor.getPosition() < ANGLER_MAX) AnglerMotor.moveVelocity(anglerPower * 0.3);
-  else if(AnglerMotor.getPosition() >= ANGLER_MAX && anglerPower < 0) AnglerMotor.moveVelocity(anglerPower * 0.3);
-  else if(AnglerMotor.getPosition() <= ANGLER_MIN && anglerPower > 0) AnglerMotor.moveVelocity(anglerPower * 0.7);
-  else AnglerMotor.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+  if(anglerPower > -10 && anglerPower < 10 ) anglerPower = 0;
+  if(anglerMotor->getPosition() > 50 && anglerMotor->getPosition() < ANGLER_MID) anglerMotor->moveVelocity(anglerPower * 0.7);
+  else if(anglerMotor->getPosition() > ANGLER_MID && anglerMotor->getPosition() < ANGLER_MAX) anglerMotor->moveVelocity(anglerPower * 0.3);
+  else if(anglerMotor->getPosition() >= ANGLER_MAX && anglerPower < 0) anglerMotor->moveVelocity(anglerPower * 0.3);
+  else if(anglerMotor->getPosition() <= ANGLER_MIN && anglerPower > 0) anglerMotor->moveVelocity(anglerPower * 0.7);
+  else anglerMotor->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
 }
 
 void Jellyfish::intake(pros::Controller &joystick) {

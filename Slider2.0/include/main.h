@@ -55,15 +55,9 @@ using namespace pros;
 using namespace pros;
 using namespace pros::literals;
 
-extern MotorGroup LeftMotors;
-extern MotorGroup RightMotors;
-extern okapi::Motor ArmMotor;
-extern okapi::Motor AnglerMotor;
-extern okapi::Motor intakeR;
-extern okapi::Motor intakeL;
-int ANGLER_MID = 2000;
-int ANGLER_MAX = 3000;
-int ANGLER_MIN = 50;
+
+
+
 
 /**
  * Prototypes for the competition control tasks are redefined here to ensure
