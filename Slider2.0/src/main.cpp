@@ -1,6 +1,7 @@
 #include "main.h"
 #include "okapi/api.hpp"
 #include "jellyfish.hpp"
+#include "drive.hpp"
 using namespace okapi;
 /**
  * A callback function for LLEMU's center button.
@@ -29,9 +30,6 @@ void initialize() {
 	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
-
-	okapi::MotorGroup RightMotors({19, 20});
-	okapi::MotorGroup LeftMotors({-11,-12});
 
 
 }
@@ -66,8 +64,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	auto robot = Jellyfish::getInstance();
-	robot->drive->chassis->turnAngle(20_deg);
+	// auto robot = Jellyfish::getInstance();
+	// robot->drive->chassis->turnAngle(20_deg);
 	// auto chassis = ChassisControllerBuilder()
 	// 	.withMotors(LeftMotors, RightMotors)
 	// 	.withGains(
@@ -99,44 +97,12 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	// okapi::MotorGroup RightMotors({19, -20});
-	// okapi::MotorGroup LeftMotors({-11,12});
+	// pros::lcd::initialize();
 	auto robot = Jellyfish::getInstance();
+	// auto robot = Drive();
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	while(true) {
+		pros::lcd::set_text(1, "UwU");
 		robot->opControl(master);
 	}
-	// pros::ADIEncoder leftEncoder = pros::ADIEncoder('a', 'b');
-	// pros::ADIEncoder rightEncoder = pros::ADIEncoder('c','d',true);
-	// auto chassis = ChassisControllerBuilder()
-	//     .withMotors(LeftMotors, RightMotors)
-	// 		// .withGains(
-	// 		// 		{0.005, 0, 0.0001}, // Distance controller gains
-	// 		// 		{0.0027, 0, 0.0000001}, // Turn controller gains
-	// 		// 		{0.005, 0, 0.0001}  // Angle controller gains (helps drive straight)
-	// 		// )
-	//     // Green gearset, 4 in wheel diam, 11.5 in wheel track
-	//     .withDimensions(AbstractMotor::gearset::green, {{4_in, 10_in}, imev5GreenTPR})
-	//     .build();
-	// double distKP = 0.001;
-	// double distKI = 0;
-	// double distKD = 0.001;
-	// auto chassis = ChassisControllerBuilder()
-	// 	.withMotors(LeftMotors, RightMotors)
-	// 	.withSensors(ADIEncoder('A', 'B'), ADIEncoder('C', 'D', true))
-	// 	.withLogger(
-  //       std::make_shared<Logger>(
-  //           TimeUtilFactory::createDefault().getTimer(), // It needs a Timer
-  //           "/ser/sout", // Output to the PROS terminal
-  //           Logger::LogLevel::debug // Most verbose log level
-  //       )
-  //   )
-	// 	.withGains(
-	// 			{0.005, 0, 0.0001}, // Distance controller gains
-	// 			{0.0027, 0, 0.0000001}, // Turn controller gains
-	// 			{0.005, 0, 0.0001}  // Angle controller gains (helps drive straight)
-	// 	)
-	// 	.withDimensions(AbstractMotor::gearset::green, {{3_in, 14.5_in}, imev5GreenTPR})
-	// 	.withOdometry() // Use the same scales as the chassis (above)
-	// 	.buildOdometry();
 }
