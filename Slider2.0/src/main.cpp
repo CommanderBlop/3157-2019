@@ -9,6 +9,9 @@ using namespace okapi;
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
+
+auto robot = Jellyfish::getInstance(); //singleton setup
+
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
@@ -26,12 +29,6 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
-
-
 }
 
 /**
@@ -50,7 +47,9 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
+void competition_initialize() {
+		auto robot = Jellyfish::getInstance();
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -64,23 +63,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// auto robot = Jellyfish::getInstance();
-	// robot->drive->chassis->turnAngle(20_deg);
-	// auto chassis = ChassisControllerBuilder()
-	// 	.withMotors(LeftMotors, RightMotors)
-	// 	.withGains(
-	// 			{0.001, 0, 0.0001}, // Distance controller gains
-	// 			{0.001, 0, 0.0001}, // Turn controller gains
-	// 			{0.001, 0, 0.0001}  // Angle controller gains (helps drive straight)
-	// 	)
-	// 	.withDimensions(AbstractMotor::gearset::green, {{4_in, 14_in}, imev5GreenTPR})
-	// 	.withOdometry() // Use the same scales as the chassis (above)
-	// 	.buildOdometry();
-	//
-	// chassis->setMaxVelocity(100);
-	// chassis->setState({0_in, 0_in, 0_deg});
-	// chassis->driveToPoint({2_ft, 2_ft});
-	// chassis->turnToAngle(-45_deg);
+	// robot->autonRed();
+	robot->autonBlue();
 }
 
 /**
@@ -97,12 +81,9 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	// pros::lcd::initialize();
-	auto robot = Jellyfish::getInstance();
-	// auto robot = Drive();
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	// robot->autonRight();
 	while(true) {
-		pros::lcd::set_text(1, "UwU");
 		robot->opControl(master);
 	}
 }
